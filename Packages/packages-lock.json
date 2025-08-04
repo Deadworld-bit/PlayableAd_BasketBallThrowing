@@ -135,6 +135,12 @@
       },
       "url": "https://packages.unity.com"
     },
+    "uk.lunalabs.luna": {
+      "version": "file:E:/Unity Files/Plugins/6.3.0/scripts",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,
