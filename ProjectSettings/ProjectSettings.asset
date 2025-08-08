@@ -871,8 +871,8 @@ PlayerSettings:
   apiCompatibilityLevelPerPlatform: {}
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: PlayableAd_BasketBallThrowing
-  metroPackageVersion: 
+  metroPackageName: PlayableAdBasketBallThrowing
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -880,7 +880,7 @@ PlayerSettings:
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: PlayableAd_BasketBallThrowing
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: PlayableAd_BasketBallThrowing
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
