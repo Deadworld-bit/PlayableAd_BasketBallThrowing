@@ -158,15 +158,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e46dc6fabd61164499a69d01f6fe5dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 2878013519020688071}
-  ballLayer:
+  _camera: {fileID: 2878013519020688071}
+  _ballLayer:
     serializedVersion: 2
     m_Bits: 8
-  touchTrail: {fileID: 2878013518701920564}
-  maxLaunchForce: 500
-  dragSensitivity: 12
-  upwardBiasFactor: 0.6
-  gentleFactor: 0.06
+  _touchTrail: {fileID: 2878013518701920564}
+  _maxLaunchForce: 200
+  _dragSensitivity: 10
+  _upwardBiasFactor: 0.5
+  _gentleFactor: 0.1
 --- !u!4 &595421157
 Transform:
   m_ObjectHideFlags: 0
@@ -360,6 +360,7 @@ GameObject:
   - component: {fileID: 2878013519775662904}
   - component: {fileID: 2878013519071019733}
   - component: {fileID: 2878013519591113511}
+  - component: {fileID: 2878013519775662905}
   m_Layer: 0
   m_Name: dunkTriggerTop
   m_TagString: 
@@ -697,6 +698,7 @@ GameObject:
   - component: {fileID: 2878013519775662906}
   - component: {fileID: 2878013519071019738}
   - component: {fileID: 2878013519591113514}
+  - component: {fileID: 2878013519775662910}
   m_Layer: 0
   m_Name: dunkTriggerBottom
   m_TagString: 
@@ -837,6 +839,7 @@ GameObject:
   - component: {fileID: 2878013518752252543}
   - component: {fileID: 2878013519591113515}
   - component: {fileID: 2878013519674999600}
+  - component: {fileID: 2878013519674999601}
   m_Layer: 0
   m_Name: BasketRingJoint
   m_TagString: 
@@ -1391,6 +1394,7 @@ GameObject:
   - component: {fileID: 2878013520966845276}
   - component: {fileID: 2878013520966845275}
   - component: {fileID: 2878013519591113516}
+  - component: {fileID: 2878013520966845278}
   m_Layer: 0
   m_Name: basketRing
   m_TagString: 
@@ -6054,6 +6058,24 @@ HingeJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &2878013519674999601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2878013518701920491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf8fb0ffeedc0db46bd711d580468909, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _acceptWindow: 1
+  _cleanupInterval: 2
+  _dunkParticles: {fileID: 2878013522007032674}
+  _perfectDunkParticles: {fileID: 2878013522007032693}
+  _normalDunkScore: 1
+  _perfectDunkScore: 2
 --- !u!65 &2878013519775662897
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6222,6 +6244,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2878013519775662905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2878013518701920265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6726ee6cf0b51b4d806fd93a6cabedd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _detector: {fileID: 2878013519674999601}
+  _isTop: 1
 --- !u!65 &2878013519775662906
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6306,6 +6342,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2878013519775662910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2878013518701920421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6726ee6cf0b51b4d806fd93a6cabedd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _detector: {fileID: 2878013519674999601}
+  _isTop: 0
 --- !u!81 &2878013520044098366
 AudioListener:
   m_ObjectHideFlags: 0
@@ -7511,6 +7561,19 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 0
   m_Center: {x: 0, y: 0.25, z: -4.28}
+--- !u!114 &2878013520966845278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2878013518701920688}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53160476d911b8e4f8f41c86930492c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _detector: {fileID: 2878013519674999601}
 --- !u!137 &2878013520983622494
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0
