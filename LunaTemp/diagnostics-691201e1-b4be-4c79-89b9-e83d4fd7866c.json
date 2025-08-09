@@ -1,0 +1,199 @@
+{
+  "BuildID": "691201e1-b4be-4c79-89b9-e83d4fd7866c",
+  "Command": "project:recompile",
+  "ProjectID": "d837ba3fd0e3a8246b4e77bdd4948b88",
+  "ProjectStateHash": "98fc4d4ee49ba691fd0b43ce03ee73f2135722a5efe5db8c6a428aa8388783b3",
+  "StageCompletedAt": 3,
+  "EarliestFatalError": 0,
+  "StartTime": 1754775487421,
+  "EndTime": 1754775492672,
+  "PlaygroundUserID": 26397,
+  "OperatingSystem": "win32",
+  "UnityPackageID": null,
+  "TargetPlatform": "develop",
+  "UnityVersion": "2022.3.62f1",
+  "LunaVersion": "6.3.0",
+  "LogCount": 7,
+  "Logs": [
+    {
+      "LogID": "bcffd835-35b5-4e7d-bfb4-8c4be4dce549",
+      "Order": 4,
+      "Timestamp": 1754775493117,
+      "Stage": 3,
+      "ErrorType": 1,
+      "ErrorCode": "LP3006",
+      "Description": "You are not using the Luna API: Playable.InstallFullGame",
+      "Details": [
+        "You are not using the Luna API: Playable.InstallFullGame. Some ad networks require these calls. Please add these calls to ensure your playable works on all ad networks. Check documentation for more information."
+      ],
+      "DescriptionValues": [
+        "Playable",
+        "InstallFullGame"
+      ],
+      "DetailsValues": [
+        "Playable",
+        "InstallFullGame"
+      ],
+      "LogCount": 1,
+      "LinePosition": null,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "3dabfd97-f6d6-40d1-8715-96994b0c44ff",
+      "Order": 4,
+      "Timestamp": 1754775493123,
+      "Stage": 3,
+      "ErrorType": 1,
+      "ErrorCode": "LP3015",
+      "Description": "You are not the Game Ended API: LifeCycle.GameEnded",
+      "Details": [
+        "You are not using the Game Ended API: LifeCycle.GameEnded. Some ad networks require this call, please add the event to avoid the ad being rejected."
+      ],
+      "DescriptionValues": [
+        "LifeCycle",
+        "GameEnded"
+      ],
+      "DetailsValues": [
+        "LifeCycle",
+        "GameEnded"
+      ],
+      "LogCount": 1,
+      "LinePosition": null,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "5c1dc240-9fde-4e81-82f8-31fb0f15f3ea",
+      "Order": 4,
+      "Timestamp": 1754775493124,
+      "Stage": 3,
+      "ErrorType": 3,
+      "ErrorCode": "LP3007",
+      "Description": "You are not using any custom events",
+      "Details": [
+        "You are not using any custom events. It is recommended to use custom events to have a better understanding of the playable."
+      ],
+      "DescriptionValues": [
+        ""
+      ],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": null,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "2fd09dbf-efae-425e-9337-284b4bd363a9",
+      "Order": 4,
+      "Timestamp": 1754775493126,
+      "Stage": 3,
+      "ErrorType": 3,
+      "ErrorCode": "LP3011",
+      "Description": "You are not using any LunaPlaygroundFields attributes.",
+      "Details": [
+        "You are not using any LunaPlaygroundFields attributes, it allows you to configure your playable to different concepts to find the best variation, which can drastically improve playable performance on all ad networks."
+      ],
+      "DescriptionValues": null,
+      "DetailsValues": null,
+      "LogCount": 1,
+      "LinePosition": null,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "1f3e75c0-3c55-4f7b-b225-8313a9d321f8",
+      "Order": 1,
+      "Timestamp": 1754774900302,
+      "Stage": 1,
+      "ErrorType": 2,
+      "ErrorCode": "LP1016",
+      "Description": "Extensive usage of ParticleSystem Component",
+      "Details": [
+        "There is extensive usage of the ParticleSystem component.\nExcessive usage of any component can be detrimental to performance on lower and in some cases higher end devices, consider reducing the amount the component is used.\nRecommended count: 10, current count 19."
+      ],
+      "DescriptionValues": [
+        "ParticleSystem"
+      ],
+      "DetailsValues": [
+        "ParticleSystem",
+        "10",
+        "19"
+      ],
+      "LogCount": 1,
+      "LinePosition": 0,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "7fa42f72-0f52-44a5-af76-5a5d566a798b",
+      "Order": 2,
+      "Timestamp": 1754774900312,
+      "Stage": 1,
+      "ErrorType": 0,
+      "ErrorCode": "LP1015",
+      "Description": "This TMP version is not fully supported",
+      "Details": [
+        "The incorrect Text Mesh Pro for this Unity version is in use, please update or downgrade to the recommended version {0} in the package manager. Go to Window → Package Manager"
+      ],
+      "DescriptionValues": [],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": 0,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "f602f913-f60e-4543-879d-4414ec9ea5eb",
+      "Order": 3,
+      "Timestamp": 1754774900313,
+      "Stage": 1,
+      "ErrorType": 2,
+      "ErrorCode": "LP1010",
+      "Description": "Looks like a collider was scaled, this might affect performance.",
+      "Details": [
+        "CubeBottom",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "dunkTriggerBottom",
+        "dunkTriggerTop"
+      ],
+      "DescriptionValues": [],
+      "DetailsValues": [],
+      "LogCount": 17,
+      "LinePosition": 0,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    }
+  ]
+}

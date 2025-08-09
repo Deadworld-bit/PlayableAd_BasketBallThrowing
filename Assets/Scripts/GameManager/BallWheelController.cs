@@ -7,22 +7,21 @@ using UnityEngine.UI;
 public class BallWheelController : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler
 {
     [Header("References")]
-    public Transform wheelContainer;           // the parent that contains ball transforms (immediate children)
+    public Transform wheelContainer;           
     public Button okButton;
     public Button randomButton;
 
     [Header("Layout")]
-    public float radius = 2.0f;                // local units for circle radius
+    public float radius = 2.0f;                
     public float zOffset = 0f;
-    public float startAngleDeg = 0f;           // 0 = up (selection at up)
-    public float zRotationPerItem = 0f;        // optional rotation of each ball
+    public float startAngleDeg = 0f;           
+    public float zRotationPerItem = 0f;        
 
     [Header("Spin Physics")]
-    public float angularFriction = 800f;       // degrees per second^2
-    public float snapSpeed = 10f;              // snap lerp speed
-    public float minFlingVelocity = 15f;       // threshold to snap
+    public float angularFriction = 800f;      
+    public float snapSpeed = 10f;              
+    public float minFlingVelocity = 15f;       
 
-    // runtime
     private List<Transform> _items = new List<Transform>();
     private List<BallItem> _itemScripts = new List<BallItem>();
     private int _count = 0;
@@ -30,13 +29,23 @@ public class BallWheelController : MonoBehaviour, IPointerDownHandler, IDragHand
     private float _rotationDeg = 0f;
     private float _angularVelocity = 0f;
 
-    // drag tracking
+
     private Vector2 _lastPointerPos;
     private float _lastDragTime;
     private bool _dragging = false;
 
-    // selection
     private int _selectedIndex = 0;
+
+    private Camera _cam;
+
+    private void Awake()
+    {
+        _cam = Camera.main;
+        if (_cam == null)
+        {
+            Debug.LogWarning("BallWheelController: Camera.main is null. Pointer math may not work correctly.");
+        }
+    }
 
     private void Start()
     {
@@ -54,12 +63,14 @@ public class BallWheelController : MonoBehaviour, IPointerDownHandler, IDragHand
             Debug.LogError("BallWheelController: wheelContainer not assigned.");
             return;
         }
+
         foreach (Transform t in wheelContainer)
         {
             _items.Add(t);
             BallItem bi = t.GetComponent<BallItem>();
             _itemScripts.Add(bi);
         }
+
         _count = _items.Count;
         _anglePerItem = _count > 0 ? 360f / _count : 360f;
         ArrangeItems();
@@ -89,7 +100,6 @@ public class BallWheelController : MonoBehaviour, IPointerDownHandler, IDragHand
             {
                 float delta = _angularVelocity * Time.deltaTime;
                 _rotationDeg += delta;
-                // friction
                 _angularVelocity = Mathf.MoveTowards(_angularVelocity, 0f, angularFriction * Time.deltaTime);
 
                 ArrangeItems();
@@ -100,30 +110,63 @@ public class BallWheelController : MonoBehaviour, IPointerDownHandler, IDragHand
                 }
             }
         }
+
+        // keep degrees normalized
         _rotationDeg = Mathf.Repeat(_rotationDeg, 360f);
         UpdateAllSelection();
     }
 
-    // UI pointer events
     public void OnPointerDown(PointerEventData eventData)
     {
         _dragging = true;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(transform as RectTransform, eventData.position, eventData.pressEventCamera, out _lastPointerPos);
+        _lastPointerPos = eventData.position; 
         _lastDragTime = Time.time;
         _angularVelocity = 0f;
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        Vector2 newPos;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(transform as RectTransform, eventData.position, eventData.pressEventCamera, out newPos);
+        Vector2 newScreenPos = eventData.position;
 
-        Vector2 center = (transform as RectTransform).rect.center;
-        Vector2 a = _lastPointerPos - center;
-        Vector2 b = newPos - center;
+        if (wheelContainer == null)
+        {
+            _lastPointerPos = newScreenPos;
+            _lastDragTime = Time.time;
+            return;
+        }
+
+        // compute wheel center in screen space. Support both world-space and UI RectTransform wheelContainers.
+        Vector2 wheelScreenCenter;
+        RectTransform rectT = wheelContainer as RectTransform;
+        if (rectT != null)
+        {
+            // wheelContainer is a UI element (RectTransform)
+            if (_cam != null)
+                wheelScreenCenter = RectTransformUtility.WorldToScreenPoint(_cam, rectT.position);
+            else
+                wheelScreenCenter = RectTransformUtility.WorldToScreenPoint(null, rectT.position);
+        }
+        else
+        {
+            // wheelContainer is a world-space Transform
+            if (_cam != null)
+            {
+                Vector3 sc = _cam.WorldToScreenPoint(wheelContainer.position);
+                wheelScreenCenter = new Vector2(sc.x, sc.y);
+            }
+            else
+            {
+                // fallback: use canvas center (0.5,0.5) in screen coords
+                wheelScreenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+            }
+        }
+
+        Vector2 a = _lastPointerPos - wheelScreenCenter;
+        Vector2 b = newScreenPos - wheelScreenCenter;
+
         if (a.sqrMagnitude < 0.0001f || b.sqrMagnitude < 0.0001f)
         {
-            _lastPointerPos = newPos;
+            _lastPointerPos = newScreenPos;
             _lastDragTime = Time.time;
             return;
         }
@@ -131,13 +174,15 @@ public class BallWheelController : MonoBehaviour, IPointerDownHandler, IDragHand
         float angleA = Mathf.Atan2(a.y, a.x) * Mathf.Rad2Deg;
         float angleB = Mathf.Atan2(b.y, b.x) * Mathf.Rad2Deg;
         float deltaAngle = Mathf.DeltaAngle(angleA, angleB);
+
+        // rotate wheel by deltaAngle
         _rotationDeg += deltaAngle;
         ArrangeItems();
 
         float dt = Mathf.Max(0.0001f, Time.time - _lastDragTime);
         _angularVelocity = deltaAngle / dt;
 
-        _lastPointerPos = newPos;
+        _lastPointerPos = newScreenPos;
         _lastDragTime = Time.time;
     }
 
@@ -161,7 +206,7 @@ public class BallWheelController : MonoBehaviour, IPointerDownHandler, IDragHand
                 bestIndex = i;
             }
         }
-        float desiredRotation = Mathf.Repeat(- (startAngleDeg + bestIndex * _anglePerItem), 360f);
+        float desiredRotation = Mathf.Repeat(-(startAngleDeg + bestIndex * _anglePerItem), 360f);
         StopAllCoroutines();
         StartCoroutine(SmoothRotateTo(desiredRotation));
     }
@@ -216,7 +261,7 @@ public class BallWheelController : MonoBehaviour, IPointerDownHandler, IDragHand
     public int GetSelectedIndex() => _selectedIndex;
     public Transform GetSelectedTransform() => _items.Count > _selectedIndex ? _items[_selectedIndex] : null;
 
-    // Confirm button
+
     private void OnConfirm()
     {
         Debug.Log("Confirmed ball index: " + _selectedIndex);
@@ -226,12 +271,11 @@ public class BallWheelController : MonoBehaviour, IPointerDownHandler, IDragHand
         }
     }
 
-    // Random pick: spin & auto-confirm
     private void OnRandomPick()
     {
         if (_count == 0) return;
         int rnd = Random.Range(0, _count);
-        float desiredRotation = Mathf.Repeat(- (startAngleDeg + rnd * _anglePerItem), 360f);
+        float desiredRotation = Mathf.Repeat(-(startAngleDeg + rnd * _anglePerItem), 360f);
         StopAllCoroutines();
         StartCoroutine(SpinToIndexThenSnapAndConfirm(desiredRotation, rnd));
     }

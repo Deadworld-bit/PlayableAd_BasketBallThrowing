@@ -20,9 +20,9 @@ public class DunkDetector : MonoBehaviour
     [SerializeField] private int _normalDunkScore = 1;     
     [SerializeField] private int _perfectDunkScore = 2;    
 
-    private readonly Dictionary<GameObject, float> _topEnteredAt = new();
-    private readonly HashSet<GameObject> _rimTouched = new();
-    private readonly HashSet<GameObject> _alreadyScored = new();
+    private readonly Dictionary<GameObject, float> _topEnteredAt = new Dictionary<GameObject, float>();
+    private readonly HashSet<GameObject> _rimTouched = new HashSet<GameObject>();
+    private readonly HashSet<GameObject> _alreadyScored = new HashSet<GameObject>();
 
     private float _lastCleanup;
 

@@ -1,0 +1,505 @@
+{
+  "BuildID": "072df38d-c443-411f-96ed-4596d78d27b0",
+  "Command": "project:build",
+  "ProjectID": "d837ba3fd0e3a8246b4e77bdd4948b88",
+  "ProjectStateHash": "1b9be17b8a066c2e6a8e137b39cf011313b298453f93186ca7260b5fb73cd0a5",
+  "StageCompletedAt": 3,
+  "EarliestFatalError": 3,
+  "StartTime": 1754773324446,
+  "EndTime": 1754773341059,
+  "PlaygroundUserID": 26397,
+  "OperatingSystem": "win32",
+  "UnityPackageID": null,
+  "TargetPlatform": "develop",
+  "UnityVersion": "2022.3.62f1",
+  "LunaVersion": "6.3.0",
+  "LogCount": 20,
+  "Logs": [
+    {
+      "LogID": "1312817b-365a-4e68-9cfb-59fc54f9c5ba",
+      "Order": 17,
+      "Timestamp": 1754773341490,
+      "Stage": 3,
+      "ErrorType": 1,
+      "ErrorCode": "LP3006",
+      "Description": "You are not using the Luna API: Playable.InstallFullGame",
+      "Details": [
+        "You are not using the Luna API: Playable.InstallFullGame. Some ad networks require these calls. Please add these calls to ensure your playable works on all ad networks. Check documentation for more information."
+      ],
+      "DescriptionValues": [
+        "Playable",
+        "InstallFullGame"
+      ],
+      "DetailsValues": [
+        "Playable",
+        "InstallFullGame"
+      ],
+      "LogCount": 1,
+      "LinePosition": null,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "1a35b3b6-787e-4133-87a7-9fdfee66047f",
+      "Order": 17,
+      "Timestamp": 1754773341491,
+      "Stage": 3,
+      "ErrorType": 1,
+      "ErrorCode": "LP3015",
+      "Description": "You are not the Game Ended API: LifeCycle.GameEnded",
+      "Details": [
+        "You are not using the Game Ended API: LifeCycle.GameEnded. Some ad networks require this call, please add the event to avoid the ad being rejected."
+      ],
+      "DescriptionValues": [
+        "LifeCycle",
+        "GameEnded"
+      ],
+      "DetailsValues": [
+        "LifeCycle",
+        "GameEnded"
+      ],
+      "LogCount": 1,
+      "LinePosition": null,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "103cb089-e186-464b-b0cf-75091a7b0c11",
+      "Order": 17,
+      "Timestamp": 1754773341491,
+      "Stage": 3,
+      "ErrorType": 3,
+      "ErrorCode": "LP3007",
+      "Description": "You are not using any custom events",
+      "Details": [
+        "You are not using any custom events. It is recommended to use custom events to have a better understanding of the playable."
+      ],
+      "DescriptionValues": [
+        ""
+      ],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": null,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "6767cc16-26c7-4d7b-a760-d7f215389409",
+      "Order": 17,
+      "Timestamp": 1754773341492,
+      "Stage": 3,
+      "ErrorType": 3,
+      "ErrorCode": "LP3011",
+      "Description": "You are not using any LunaPlaygroundFields attributes.",
+      "Details": [
+        "You are not using any LunaPlaygroundFields attributes, it allows you to configure your playable to different concepts to find the best variation, which can drastically improve playable performance on all ad networks."
+      ],
+      "DescriptionValues": null,
+      "DetailsValues": null,
+      "LogCount": 1,
+      "LinePosition": null,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "7ab82168-8c07-4cbe-a4ff-a1c1578474f4",
+      "Order": 0,
+      "Timestamp": 1754773326626,
+      "Stage": 1,
+      "ErrorType": 0,
+      "ErrorCode": "LP1030",
+      "Description": "TMP Font Asset uses unsupported 'Atlas Population Mode'",
+      "Details": [
+        "TMP Font Asset '{0}' uses Atlas Population Mode '{1}' which is not supported"
+      ],
+      "DescriptionValues": [],
+      "DetailsValues": [
+        "LiberationSans SDF - Fallback",
+        "Dynamic"
+      ],
+      "LogCount": 1,
+      "LinePosition": 0,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "be475495-7592-4ec4-a53c-fe771d7c1527",
+      "Order": 1,
+      "Timestamp": 1754773329347,
+      "Stage": 1,
+      "ErrorType": 2,
+      "ErrorCode": "LP1014",
+      "Description": "We recommend running Runtime Analysis to find and remove all unused code",
+      "Details": [
+        "Navigate to the Runtime Analysis → Code tab to enable code stripping. Before uploading the playable, please make sure to have played all scenario’s of the playable in a development build to make Runtime Analysis work properly."
+      ],
+      "DescriptionValues": [],
+      "DetailsValues": [],
+      "LogCount": 1,
+      "LinePosition": 0,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "c3c94b2e-7bf7-489e-acd7-3013308d041a",
+      "Order": 2,
+      "Timestamp": 1754773329347,
+      "Stage": 1,
+      "ErrorType": 2,
+      "ErrorCode": "LP1016",
+      "Description": "Extensive usage of ParticleSystem Component",
+      "Details": [
+        "There is extensive usage of the ParticleSystem component.\nExcessive usage of any component can be detrimental to performance on lower and in some cases higher end devices, consider reducing the amount the component is used.\nRecommended count: 10, current count 19."
+      ],
+      "DescriptionValues": [
+        "ParticleSystem"
+      ],
+      "DetailsValues": [
+        "ParticleSystem",
+        "10",
+        "19"
+      ],
+      "LogCount": 1,
+      "LinePosition": 0,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "782d64da-6775-4121-927c-9e1bc3e30dc3",
+      "Order": 3,
+      "Timestamp": 1754773329361,
+      "Stage": 1,
+      "ErrorType": 0,
+      "ErrorCode": "LP1015",
+      "Description": "This TMP version is not fully supported",
+      "Details": [
+        "The incorrect Text Mesh Pro for this Unity version is in use, please update or downgrade to the recommended version {0} in the package manager. Go to Window → Package Manager"
+      ],
+      "DescriptionValues": [],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": 0,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "4fffd95b-318a-45cd-82a3-85438fab45f0",
+      "Order": 4,
+      "Timestamp": 1754773329361,
+      "Stage": 1,
+      "ErrorType": 0,
+      "ErrorCode": "LP1032",
+      "Description": "Package(s) is not supported in Luna",
+      "Details": [
+        "Currently package(s) com.unity.timeline are not supported in Luna. We recommend you to remove it and workaround it's functionality."
+      ],
+      "DescriptionValues": [
+        "com.unity.timeline (1.7.7)"
+      ],
+      "DetailsValues": [
+        "com.unity.timeline"
+      ],
+      "LogCount": 1,
+      "LinePosition": 0,
+      "FilePath": "E:/Unity Files/Samples/PlayableAd_BasketBallThrowing/Packages\\manifest.json",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "643fac65-0d6b-4c7b-bbc0-fe23a79d5976",
+      "Order": 5,
+      "Timestamp": 1754773329361,
+      "Stage": 1,
+      "ErrorType": 3,
+      "ErrorCode": "LP1002",
+      "Description": "Repeat wrap mode used on a texture with non power-of-two dimensions, this might not be rendered correctly.",
+      "Details": [
+        "Repeat wrap mode used on 'LiberationSans SDF Atlas' texture at 'Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset' with non power-of-two dimensions, this might not be rendered correctly."
+      ],
+      "DescriptionValues": [],
+      "DetailsValues": [
+        "LiberationSans SDF Atlas",
+        "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset"
+      ],
+      "LogCount": 1,
+      "LinePosition": 0,
+      "FilePath": "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "f2793714-6029-4a55-867e-0abf3acc14eb",
+      "Order": 6,
+      "Timestamp": 1754773329361,
+      "Stage": 1,
+      "ErrorType": 2,
+      "ErrorCode": "LP1010",
+      "Description": "Looks like a collider was scaled, this might affect performance.",
+      "Details": [
+        "CubeBottom",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "Cube",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "dunkTriggerBottom",
+        "dunkTriggerTop"
+      ],
+      "DescriptionValues": [],
+      "DetailsValues": [],
+      "LogCount": 17,
+      "LinePosition": 0,
+      "FilePath": "",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 0
+    },
+    {
+      "LogID": "81fbd43f-8a3b-453b-8134-d94995214e9a",
+      "Order": 7,
+      "Timestamp": 1754773341055,
+      "Stage": 3,
+      "ErrorType": 0,
+      "ErrorCode": "CS8124",
+      "Description": "Tuple must contain at least two elements.",
+      "Details": [
+        "private readonly Dictionary<GameObject, float> _topEnteredAt = new();"
+      ],
+      "DescriptionValues": [
+        ""
+      ],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": 23,
+      "FilePath": "E:\\Unity Files\\Samples\\PlayableAd_BasketBallThrowing\\Assets\\Scripts\\GameManager\\DunkDetector.cs",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 1
+    },
+    {
+      "LogID": "7b61399c-e202-485d-a550-4a08c7f76b55",
+      "Order": 8,
+      "Timestamp": 1754773341058,
+      "Stage": 3,
+      "ErrorType": 0,
+      "ErrorCode": "CS1526",
+      "Description": "A new expression requires (), [], or {} after type",
+      "Details": [
+        "private readonly Dictionary<GameObject, float> _topEnteredAt = new();"
+      ],
+      "DescriptionValues": [
+        ""
+      ],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": 23,
+      "FilePath": "E:\\Unity Files\\Samples\\PlayableAd_BasketBallThrowing\\Assets\\Scripts\\GameManager\\DunkDetector.cs",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 1
+    },
+    {
+      "LogID": "c6dde9a8-ae75-4b20-896d-7875416168ca",
+      "Order": 9,
+      "Timestamp": 1754773341058,
+      "Stage": 3,
+      "ErrorType": 0,
+      "ErrorCode": "CS8124",
+      "Description": "Tuple must contain at least two elements.",
+      "Details": [
+        "private readonly HashSet<GameObject> _rimTouched = new();"
+      ],
+      "DescriptionValues": [
+        ""
+      ],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": 24,
+      "FilePath": "E:\\Unity Files\\Samples\\PlayableAd_BasketBallThrowing\\Assets\\Scripts\\GameManager\\DunkDetector.cs",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 1
+    },
+    {
+      "LogID": "ee3f3408-4d48-44c5-93ad-dbce8b5530c8",
+      "Order": 10,
+      "Timestamp": 1754773341058,
+      "Stage": 3,
+      "ErrorType": 0,
+      "ErrorCode": "CS1526",
+      "Description": "A new expression requires (), [], or {} after type",
+      "Details": [
+        "private readonly HashSet<GameObject> _rimTouched = new();"
+      ],
+      "DescriptionValues": [
+        ""
+      ],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": 24,
+      "FilePath": "E:\\Unity Files\\Samples\\PlayableAd_BasketBallThrowing\\Assets\\Scripts\\GameManager\\DunkDetector.cs",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 1
+    },
+    {
+      "LogID": "086f214c-a019-43b6-a000-a960f01ffa59",
+      "Order": 11,
+      "Timestamp": 1754773341058,
+      "Stage": 3,
+      "ErrorType": 0,
+      "ErrorCode": "CS8124",
+      "Description": "Tuple must contain at least two elements.",
+      "Details": [
+        "private readonly HashSet<GameObject> _alreadyScored = new();"
+      ],
+      "DescriptionValues": [
+        ""
+      ],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": 25,
+      "FilePath": "E:\\Unity Files\\Samples\\PlayableAd_BasketBallThrowing\\Assets\\Scripts\\GameManager\\DunkDetector.cs",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 1
+    },
+    {
+      "LogID": "0b932f1b-61bc-4418-aca2-e3886a22b3ea",
+      "Order": 12,
+      "Timestamp": 1754773341058,
+      "Stage": 3,
+      "ErrorType": 0,
+      "ErrorCode": "CS1526",
+      "Description": "A new expression requires (), [], or {} after type",
+      "Details": [
+        "private readonly HashSet<GameObject> _alreadyScored = new();"
+      ],
+      "DescriptionValues": [
+        ""
+      ],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": 25,
+      "FilePath": "E:\\Unity Files\\Samples\\PlayableAd_BasketBallThrowing\\Assets\\Scripts\\GameManager\\DunkDetector.cs",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 1
+    },
+    {
+      "LogID": "38b05400-1305-49f9-8bf1-d298984d10a8",
+      "Order": 13,
+      "Timestamp": 1754773341059,
+      "Stage": 3,
+      "ErrorType": 0,
+      "ErrorCode": "CS8181",
+      "Description": "'new' cannot be used with tuple type. Use a tuple literal expression instead.",
+      "Details": [
+        "private readonly Dictionary<GameObject, float> _topEnteredAt = new();"
+      ],
+      "DescriptionValues": [
+        ""
+      ],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": 23,
+      "FilePath": "E:\\Unity Files\\Samples\\PlayableAd_BasketBallThrowing\\Assets\\Scripts\\GameManager\\DunkDetector.cs",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 1
+    },
+    {
+      "LogID": "e222df1f-e2d1-4a92-a0b7-b9aef25dc804",
+      "Order": 14,
+      "Timestamp": 1754773341059,
+      "Stage": 3,
+      "ErrorType": 0,
+      "ErrorCode": "CS8181",
+      "Description": "'new' cannot be used with tuple type. Use a tuple literal expression instead.",
+      "Details": [
+        "private readonly HashSet<GameObject> _rimTouched = new();"
+      ],
+      "DescriptionValues": [
+        ""
+      ],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": 24,
+      "FilePath": "E:\\Unity Files\\Samples\\PlayableAd_BasketBallThrowing\\Assets\\Scripts\\GameManager\\DunkDetector.cs",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 1
+    },
+    {
+      "LogID": "e0cd184d-2024-43cd-892b-477dd3ca2750",
+      "Order": 15,
+      "Timestamp": 1754773341059,
+      "Stage": 3,
+      "ErrorType": 0,
+      "ErrorCode": "CS8181",
+      "Description": "'new' cannot be used with tuple type. Use a tuple literal expression instead.",
+      "Details": [
+        "private readonly HashSet<GameObject> _alreadyScored = new();"
+      ],
+      "DescriptionValues": [
+        ""
+      ],
+      "DetailsValues": [
+        ""
+      ],
+      "LogCount": 1,
+      "LinePosition": 25,
+      "FilePath": "E:\\Unity Files\\Samples\\PlayableAd_BasketBallThrowing\\Assets\\Scripts\\GameManager\\DunkDetector.cs",
+      "ClassName": "",
+      "MemberName": "",
+      "Severity": 1
+    }
+  ]
+}

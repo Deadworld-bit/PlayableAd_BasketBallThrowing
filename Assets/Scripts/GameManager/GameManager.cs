@@ -10,8 +10,6 @@ public class GameManager : MonoBehaviour
 
     [Header("Game settings")]
     [SerializeField] private float _gameDuration = 120f;
-    [Tooltip("Curve 0..1 over normalized time (0=start,1=end) used to compute difficulty multiplier")]
-    [SerializeField] private AnimationCurve difficultyCurve = AnimationCurve.Linear(0f, 1f, 1f, 1.6f);
 
     [Header("UI for the Machine")]
     [SerializeField] private TMP_Text _highestText;
@@ -54,9 +52,7 @@ public class GameManager : MonoBehaviour
     // 1 = normal, 2 = double
     public float _scoreMultiplier { get; private set; } = 1f;
 
-    public event Action<float> OnTimeChanged;
     public event Action<int> OnScoreChanged;
-    public event Action<float> OnDifficultyChanged;
     public event Action OnGameStarted;
     public event Action OnGameEnded;
 
@@ -259,15 +255,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    #region Difficulty & Timer
-    public float GetDifficultyMultiplier()
-    {
-        if (!_isRunning) return difficultyCurve.Evaluate(0f);
-        float normalized = 1f - (_timeRemaining / Mathf.Max(1f, _gameDuration));
-        float mul = difficultyCurve.Evaluate(Mathf.Clamp01(normalized));
-        return mul;
-    }
-
+    #region Timer
     private IEnumerator GameTimerCoroutine()
     {
         while (_timeRemaining > 0f && _isRunning)
@@ -277,8 +265,6 @@ public class GameManager : MonoBehaviour
 
             if (_timeRemaining < 0f) _timeRemaining = 0f;
             UpdateTimeUI();
-
-            OnDifficultyChanged?.Invoke(GetDifficultyMultiplier());
         }
         EndGame();
     }
