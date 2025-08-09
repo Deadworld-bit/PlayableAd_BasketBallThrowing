@@ -6,40 +6,37 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
+    public static GameManager _Instance { get; private set; }
 
     [Header("Game settings")]
-    public float gameDuration = 60f;
+    [SerializeField] private float _gameDuration = 120f;
     [Tooltip("Curve 0..1 over normalized time (0=start,1=end) used to compute difficulty multiplier")]
-    public AnimationCurve difficultyCurve = AnimationCurve.Linear(0f, 1f, 1f, 1.6f);
+    [SerializeField] private AnimationCurve difficultyCurve = AnimationCurve.Linear(0f, 1f, 1f, 1.6f);
 
-    [Header("UI - use TextMeshPro if available; otherwise assign Unity UI Text")]
-    public TMP_Text highestText;
-    public TMP_Text timeText;
-    public TMP_Text scoreText;
+    [Header("UI for the Machine")]
+    [SerializeField] private TMP_Text _highestText;
+    [SerializeField] private TMP_Text _timeText;
+    [SerializeField] private TMP_Text _scoreText;
 
     [Header("Perfect dunk popup")]
-    public GameObject perfectPopup;
-    public float perfectPopupDuration = 1.0f;
+    [SerializeField] private GameObject _perfectPopup;
+    [SerializeField] private float _perfectPopupDuration = 1.0f;
 
     [Header("Highscore")]
-    public string highscoreKey = "Highscore";
+    [SerializeField] private string _highscoreKey = "Highscore";
 
-    // NEW: References to start and end screens
     [Header("Start/End Screens")]
-    public GameObject startPanel;
-    public GameObject endPanel;
-    public Button startButton;  // Assign the StartButton in Inspector
-    public Button retryButton;  // Assign the RetryButton in Inspector
-    public TMP_Text endScoreText;  // Assign the EndScoreText in Inspector
+    [SerializeField] private GameObject _startPanel;
+    [SerializeField] private GameObject _endPanel;
+    [SerializeField] private Button _startButton;
+    [SerializeField] private Button _retryButton;
+    [SerializeField] private TMP_Text _endScoreText;
 
-    // runtime state
     public bool IsRunning { get; private set; }
     public float TimeRemaining { get; private set; }
     public int Score { get; private set; } = 0;
     public int Highscore { get; private set; } = 0;
 
-    // events
     public event Action<float> OnTimeChanged;
     public event Action<int> OnScoreChanged;
     public event Action<float> OnDifficultyChanged;
@@ -50,72 +47,65 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (_Instance != null && _Instance != this)
         {
             Destroy(gameObject);
             return;
         }
-        Instance = this;
+        _Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        if (highestText == null)
+        if (_highestText == null)
         {
             Debug.LogError("GameManager: highestText is not assigned in the Inspector!");
         }
-        if (timeText == null)
+        if (_timeText == null)
         {
             Debug.LogError("GameManager: timeText is not assigned in the Inspector!");
         }
-        if (scoreText == null)
+        if (_scoreText == null)
         {
             Debug.LogError("GameManager: scoreText is not assigned in the Inspector!");
         }
         // NEW: Check new UI references
-        if (startPanel == null || endPanel == null || startButton == null || retryButton == null || endScoreText == null)
+        if (_startPanel == null || _endPanel == null || _startButton == null || _retryButton == null || _endScoreText == null)
         {
             Debug.LogError("GameManager: One or more start/end UI elements are not assigned!");
         }
 
-        Highscore = PlayerPrefs.GetInt(highscoreKey, 0);
+        Highscore = PlayerPrefs.GetInt(_highscoreKey, 0);
         UpdateHighscoreUI();
-        if (perfectPopup != null) perfectPopup.SetActive(false);
+        if (_perfectPopup != null) _perfectPopup.SetActive(false);
 
-        // NEW: Set initial panel states (start shown, end hidden)
-        if (startPanel != null) startPanel.SetActive(true);
-        if (endPanel != null) endPanel.SetActive(false);
+        if (_startPanel != null) _startPanel.SetActive(true);
+        if (_endPanel != null) _endPanel.SetActive(false);
 
-        // NEW: Add button listeners
-        if (startButton != null)
+        if (_startButton != null)
         {
-            startButton.onClick.AddListener(() =>
+            _startButton.onClick.AddListener(() =>
             {
                 StartGame();
-                if (startPanel != null) startPanel.SetActive(false);
+                if (_startPanel != null) _startPanel.SetActive(false);
             });
         }
-        if (retryButton != null)
+        if (_retryButton != null)
         {
-            retryButton.onClick.AddListener(() =>
+            _retryButton.onClick.AddListener(() =>
             {
                 StartGame();
-                if (endPanel != null) endPanel.SetActive(false);
+                if (_endPanel != null) _endPanel.SetActive(false);
             });
         }
-    }
-
-    private void Start()
-    {
-        // REMOVED: StartGame();  // Don't start automatically; wait for button click
     }
 
     private void OnDestroy()
     {
-        if (Instance == this) Instance = null;
+        if (_Instance == this) _Instance = null;
     }
 
     private void UpdateHighscoreUI()
     {
-        SetTextSafe(highestText, $"{Highscore}");
+        SetTextSafe(_highestText, $"{Highscore}");
     }
 
     private void SetTextSafe(object uiText, string text)
@@ -127,7 +117,7 @@ public class GameManager : MonoBehaviour
 
     private void UpdateScoreUI()
     {
-        SetTextSafe(scoreText, $"{Score}");
+        SetTextSafe(_scoreText, $"{Score}");
     }
 
     private void UpdateTimeUI()
@@ -135,19 +125,18 @@ public class GameManager : MonoBehaviour
         int sec = Mathf.CeilToInt(TimeRemaining);
         int minutes = sec / 60;
         int seconds = sec % 60;
-        SetTextSafe(timeText, $"{minutes:00}:{seconds:00}");
+        SetTextSafe(_timeText, $"{minutes:00}:{seconds:00}");
     }
 
     public void StartGame()
     {
         Score = 0;
-        TimeRemaining = gameDuration;
+        TimeRemaining = _gameDuration;
         IsRunning = true;
         UpdateScoreUI();
         UpdateTimeUI();
 
-        // NEW: Hide end panel if retrying
-        if (endPanel != null) endPanel.SetActive(false);
+        if (_endPanel != null) _endPanel.SetActive(false);
 
         OnGameStarted?.Invoke();
 
@@ -165,14 +154,12 @@ public class GameManager : MonoBehaviour
         if (Score > Highscore)
         {
             Highscore = Score;
-            PlayerPrefs.SetInt(highscoreKey, Highscore);
+            PlayerPrefs.SetInt(_highscoreKey, Highscore);
             PlayerPrefs.Save();
             UpdateHighscoreUI();
         }
-
-        // NEW: Show end panel and update score text
-        if (endPanel != null) endPanel.SetActive(true);
-        if (endScoreText != null) endScoreText.text = $"Score: {Score}";
+        if (_endPanel != null) _endPanel.SetActive(true);
+        if (_endScoreText != null) _endScoreText.text = $"Score: {Score}";
 
         OnGameEnded?.Invoke();
     }
@@ -198,7 +185,7 @@ public class GameManager : MonoBehaviour
     public float GetDifficultyMultiplier()
     {
         if (!IsRunning) return difficultyCurve.Evaluate(0f);
-        float normalized = 1f - (TimeRemaining / Mathf.Max(1f, gameDuration));
+        float normalized = 1f - (TimeRemaining / Mathf.Max(1f, _gameDuration));
         float mul = difficultyCurve.Evaluate(Mathf.Clamp01(normalized));
         return mul;
     }
@@ -221,7 +208,7 @@ public class GameManager : MonoBehaviour
     private Coroutine _perfectCoroutine = null;
     private void ShowPerfectPopup()
     {
-        if (perfectPopup == null)
+        if (_perfectPopup == null)
         {
             Debug.LogWarning("GameManager: perfectPopup is not assigned, cannot show popup.");
             return;
@@ -233,16 +220,16 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator PerfectPopupCoroutine()
     {
-        perfectPopup.SetActive(true);
+        _perfectPopup.SetActive(true);
 
         float timer = 0f;
-        while (timer < perfectPopupDuration)
+        while (timer < _perfectPopupDuration)
         {
             timer += Time.deltaTime;
             yield return null;
         }
 
-        perfectPopup.SetActive(false);
+        _perfectPopup.SetActive(false);
         _perfectCoroutine = null;
     }
 
@@ -255,7 +242,7 @@ public class GameManager : MonoBehaviour
     [ContextMenu("Debug: Reset Highscore")]
     public void DebugResetHighscore()
     {
-        PlayerPrefs.DeleteKey(highscoreKey);
+        PlayerPrefs.DeleteKey(_highscoreKey);
         Highscore = 0;
         UpdateHighscoreUI();
     }

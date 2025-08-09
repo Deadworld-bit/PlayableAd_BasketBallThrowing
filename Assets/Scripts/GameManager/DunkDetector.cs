@@ -97,9 +97,9 @@ public class DunkDetector : MonoBehaviour
         }
 
         int scoreToAdd = perfect ? _perfectDunkScore : _normalDunkScore;
-        if (GameManager.Instance != null)
+        if (GameManager._Instance != null)
         {
-            GameManager.Instance.AddScore(scoreToAdd, perfect);
+            GameManager._Instance.AddScore(scoreToAdd, perfect);
         }
         else
         {
