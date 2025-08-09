@@ -12,6 +12,9 @@ public class DunkDetector : MonoBehaviour
     [Header("Effects")]
     [SerializeField] private ParticleSystem _dunkParticles;
     [SerializeField] private ParticleSystem _perfectDunkParticles;
+    [SerializeField] private AudioSource _audioSource; 
+    [SerializeField] private AudioClip _dunkSound;     
+    [SerializeField] private AudioClip _perfectDunkSound; 
 
     [Header("Scoring")]
     [SerializeField] private int _normalDunkScore = 1;     
@@ -65,6 +68,23 @@ public class DunkDetector : MonoBehaviour
             return;
         }
         Debug.Log($"RegisterDunk: ball={ball.name}, perfect={perfect}, time={Time.time}");
+
+        if (_audioSource != null)
+        {
+            AudioClip soundToPlay = perfect ? _perfectDunkSound : _dunkSound;
+            if (soundToPlay != null)
+            {
+                _audioSource.PlayOneShot(soundToPlay);
+            }
+            else
+            {
+                Debug.LogWarning($"No audio clip assigned for {(perfect ? "perfectDunkSound" : "dunkSound")}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("AudioSource is not assigned in DunkDetector.");
+        }
 
         ParticleSystem prefab = perfect ? _perfectDunkParticles : _dunkParticles;
         if (prefab == null)

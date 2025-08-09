@@ -6,6 +6,9 @@ public class BallDragAndThrow : MonoBehaviour
     [SerializeField] private Camera _camera;
     [SerializeField] private LayerMask _ballLayer;
     [SerializeField] private GameObject _touchTrail;
+    [SerializeField] private AudioSource _audioSource; 
+    [SerializeField] private AudioClip _clickSound;    
+    [SerializeField] private AudioClip _releaseSound;  
 
     [Header("Launch Settings")]
     [SerializeField] private float _maxLaunchForce = 200f;
@@ -47,6 +50,11 @@ public class BallDragAndThrow : MonoBehaviour
             _dragStartScreenPos = screenPos;
 
             _touchTrail.SetActive(true);
+
+            if (_audioSource != null && _clickSound != null)
+            {
+                _audioSource.PlayOneShot(_clickSound);
+            }
         }
     }
 
@@ -67,7 +75,15 @@ public class BallDragAndThrow : MonoBehaviour
     {
         Vector3 dragDelta = (Vector2)Input.mousePosition - (Vector2)_dragStartScreenPos;
         float dragDist = dragDelta.magnitude;
-        if (dragDist < 5f) { Cleanup(); return; }
+        if (dragDist < 5f) 
+        { 
+            Cleanup(); 
+            if (_audioSource != null && _releaseSound != null)
+            {
+                _audioSource.PlayOneShot(_releaseSound);
+            }
+            return; 
+        }
 
         float verticalRatio = Mathf.Clamp01(dragDelta.y / dragDist) * _upwardBiasFactor;
         float forwardRatio = 1f - verticalRatio;
@@ -79,6 +95,11 @@ public class BallDragAndThrow : MonoBehaviour
 
         _selectedRb.isKinematic = false;
         _selectedRb.AddForce(launchForce, ForceMode.Impulse);
+
+        if (_audioSource != null && _releaseSound != null)
+        {
+            _audioSource.PlayOneShot(_releaseSound);
+        }
 
         Cleanup();
     }

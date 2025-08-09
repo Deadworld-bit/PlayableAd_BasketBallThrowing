@@ -32,24 +32,41 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button _retryButton;
     [SerializeField] private TMP_Text _endScoreText;
 
-    [Header("Ring movement")]
-    [SerializeField] private Button _moveRingButton;                   
-    [SerializeField] private BasketRingMover _basketRingMover;
-    public float ScoreMultiplier { get; private set; } = 1f;
+    [Header("Ring movement ")]
+    [SerializeField] private Button _moveRingButton;                 
+    [SerializeField] private BasketRingMover _basketRingMover;   
 
-    public bool _IsRunning { get; private set; }
-    public float _TimeRemaining { get; private set; }
-    public int _Score { get; private set; } = 0;
-    public int _Highscore { get; private set; } = 0;
+    [Header("Ball selection UI")]
+    [SerializeField] private Button _openBallSelectButton;    
+    [SerializeField] private GameObject _ballSelectionPanel;  
+    [SerializeField] private BallWheelController _ballWheelController; 
 
-    public event Action<float> _OnTimeChanged;
-    public event Action<int> _OnScoreChanged;
-    public event Action<float> _OnDifficultyChanged;
-    public event Action _OnGameStarted;
-    public event Action _OnGameEnded;
+    [Header("Sound Effects")]
+    [SerializeField] private AudioSource _audioSource; 
+    [SerializeField] private AudioClip _buttonClickSound; 
+    [SerializeField] private AudioClip _gameCompleteSound; 
+
+    public bool _isRunning { get; private set; }
+    public float _timeRemaining { get; private set; }
+    public int _score { get; private set; } = 0;
+    public int _highscore { get; private set; } = 0;
+
+    // 1 = normal, 2 = double
+    public float _scoreMultiplier { get; private set; } = 1f;
+
+    public event Action<float> OnTimeChanged;
+    public event Action<int> OnScoreChanged;
+    public event Action<float> OnDifficultyChanged;
+    public event Action OnGameStarted;
+    public event Action OnGameEnded;
 
     private Coroutine _timerCoroutine;
+    private Coroutine _perfectCoroutine = null;
     private bool _ringMovementActive = false;
+
+
+    private bool _isPausedByBallSelection = false;
+    private float _prevTimeScale = 1f;
 
     private void Awake()
     {
@@ -61,34 +78,37 @@ public class GameManager : MonoBehaviour
         _Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        if (_highestText == null)
-        {
-            Debug.LogError("GameManager: highestText is not assigned in the Inspector!");
-        }
-        if (_timeText == null)
-        {
-            Debug.LogError("GameManager: timeText is not assigned in the Inspector!");
-        }
-        if (_scoreText == null)
-        {
-            Debug.LogError("GameManager: scoreText is not assigned in the Inspector!");
-        }
+        if (_highestText == null) Debug.LogError("GameManager: highestText is not assigned in the Inspector!");
+        if (_timeText == null) Debug.LogError("GameManager: timeText is not assigned in the Inspector!");
+        if (_scoreText == null) Debug.LogError("GameManager: scoreText is not assigned in the Inspector!");
         if (_startPanel == null || _endPanel == null || _startButton == null || _retryButton == null || _endScoreText == null)
         {
             Debug.LogError("GameManager: One or more start/end UI elements are not assigned!");
         }
 
-        if (_moveRingButton == null)
-        {
-            Debug.LogWarning("GameManager: moveRingButton not assigned - ring move UI will not work.");
-        }
-        else
+        if (_moveRingButton != null)
         {
             _moveRingButton.gameObject.SetActive(false);
-            _moveRingButton.onClick.AddListener(ToggleRingMovement);
+            _moveRingButton.onClick.AddListener(() =>
+            {
+                PlayButtonClickSound();
+                ToggleRingMovement();
+            });
         }
 
-        _Highscore = PlayerPrefs.GetInt(_highscoreKey, 0);
+        if (_openBallSelectButton != null)
+        {
+            _openBallSelectButton.gameObject.SetActive(false);
+            _openBallSelectButton.onClick.AddListener(() =>
+            {
+                PlayButtonClickSound();
+                ShowBallSelection();
+            });
+        }
+        if (_ballSelectionPanel != null)
+            _ballSelectionPanel.SetActive(false);
+
+        _highscore = PlayerPrefs.GetInt(_highscoreKey, 0);
         UpdateHighscoreUI();
         if (_perfectPopup != null) _perfectPopup.SetActive(false);
 
@@ -99,6 +119,7 @@ public class GameManager : MonoBehaviour
         {
             _startButton.onClick.AddListener(() =>
             {
+                PlayButtonClickSound();
                 StartGame();
                 if (_startPanel != null) _startPanel.SetActive(false);
             });
@@ -107,6 +128,7 @@ public class GameManager : MonoBehaviour
         {
             _retryButton.onClick.AddListener(() =>
             {
+                PlayButtonClickSound();
                 StartGame();
                 if (_endPanel != null) _endPanel.SetActive(false);
             });
@@ -120,11 +142,16 @@ public class GameManager : MonoBehaviour
         {
             _moveRingButton.onClick.RemoveListener(ToggleRingMovement);
         }
+        if (_openBallSelectButton != null)
+        {
+            _openBallSelectButton.onClick.RemoveAllListeners();
+        }
     }
 
+    #region UI Helpers
     private void UpdateHighscoreUI()
     {
-        SetTextSafe(_highestText, $"{_Highscore}");
+        SetTextSafe(_highestText, $"{_highscore}");
     }
 
     private void SetTextSafe(object uiText, string text)
@@ -136,29 +163,32 @@ public class GameManager : MonoBehaviour
 
     private void UpdateScoreUI()
     {
-        SetTextSafe(_scoreText, $"{_Score}");
+        SetTextSafe(_scoreText, $"{_score}");
     }
 
     private void UpdateTimeUI()
     {
-        int sec = Mathf.CeilToInt(_TimeRemaining);
+        int sec = Mathf.CeilToInt(_timeRemaining);
         int minutes = sec / 60;
         int seconds = sec % 60;
         SetTextSafe(_timeText, $"{minutes:00}:{seconds:00}");
     }
+    #endregion
 
+    #region Game Control
     public void StartGame()
     {
-        _Score = 0;
-        _TimeRemaining = _gameDuration;
-        _IsRunning = true;
+        _score = 0;
+        _timeRemaining = _gameDuration;
+        _isRunning = true;
         UpdateScoreUI();
         UpdateTimeUI();
 
         if (_endPanel != null) _endPanel.SetActive(false);
         if (_moveRingButton != null) _moveRingButton.gameObject.SetActive(true);
+        if (_openBallSelectButton != null) _openBallSelectButton.gameObject.SetActive(true);
 
-        _OnGameStarted?.Invoke();
+        OnGameStarted?.Invoke();
 
         if (_timerCoroutine != null) StopCoroutine(_timerCoroutine);
         _timerCoroutine = StartCoroutine(GameTimerCoroutine());
@@ -166,86 +196,95 @@ public class GameManager : MonoBehaviour
 
     public void EndGame()
     {
-        if (!_IsRunning) return;
+        if (!_isRunning) return;
 
-        _IsRunning = false;
+        _isRunning = false;
         if (_timerCoroutine != null) StopCoroutine(_timerCoroutine);
         _timerCoroutine = null;
         SetRingMovement(false);
 
-        if (_Score > _Highscore)
+        if (_audioSource != null && _gameCompleteSound != null)
         {
-            _Highscore = _Score;
-            PlayerPrefs.SetInt(_highscoreKey, _Highscore);
+            _audioSource.PlayOneShot(_gameCompleteSound);
+        }
+
+        if (_score > _highscore)
+        {
+            _highscore = _score;
+            PlayerPrefs.SetInt(_highscoreKey, _highscore);
             PlayerPrefs.Save();
             UpdateHighscoreUI();
         }
+
         if (_endPanel != null) _endPanel.SetActive(true);
-        if (_endScoreText != null) _endScoreText.text = $"Score: {_Score}";
+        if (_endScoreText != null) _endScoreText.text = $"Score: {_score}";
         if (_moveRingButton != null) _moveRingButton.gameObject.SetActive(false);
+        if (_ballSelectionPanel != null) _ballSelectionPanel.SetActive(false);
+        if (_openBallSelectButton != null) _openBallSelectButton.gameObject.SetActive(false);
 
-        _OnGameEnded?.Invoke();
-    }
-
-    private void SetRingMovement(bool active)
-    {
-        _ringMovementActive = active;
-        ScoreMultiplier = active ? 2f : 1f;
-
-        if (_basketRingMover != null)
+        if (_isPausedByBallSelection)
         {
-            if (active) _basketRingMover.StartMovement();
-            else _basketRingMover.StopMovement();
+            Time.timeScale = _prevTimeScale;
+            _isPausedByBallSelection = false;
         }
-    }
 
+        OnGameEnded?.Invoke();
+    }
+    #endregion
+
+    #region Scoring
     public void AddScore(int points, bool perfect = false)
     {
-        if (!_IsRunning)
+        if (!_isRunning)
         {
             Debug.Log("AddScore called while game is not running; ignoring.");
             return;
         }
 
-        int pointsToAdd = Mathf.RoundToInt(points * ScoreMultiplier);
-        _Score += pointsToAdd;
+        if (_isPausedByBallSelection)
+        {
+            Debug.Log("AddScore ignored because game is paused by ball selector.");
+            return;
+        }
+
+        int pointsToAdd = Mathf.RoundToInt(points * _scoreMultiplier);
+        _score += pointsToAdd;
         UpdateScoreUI();
-        _OnScoreChanged?.Invoke(_Score);
+        OnScoreChanged?.Invoke(_score);
+
         if (perfect)
         {
             ShowPerfectPopup();
         }
     }
+    #endregion
 
-    private void ToggleRingMovement()
-    {
-        SetRingMovement(!_ringMovementActive);
-    }
-
+    #region Difficulty & Timer
     public float GetDifficultyMultiplier()
     {
-        if (!_IsRunning) return difficultyCurve.Evaluate(0f);
-        float normalized = 1f - (_TimeRemaining / Mathf.Max(1f, _gameDuration));
+        if (!_isRunning) return difficultyCurve.Evaluate(0f);
+        float normalized = 1f - (_timeRemaining / Mathf.Max(1f, _gameDuration));
         float mul = difficultyCurve.Evaluate(Mathf.Clamp01(normalized));
         return mul;
     }
 
     private IEnumerator GameTimerCoroutine()
     {
-        while (_TimeRemaining > 0f && _IsRunning)
+        while (_timeRemaining > 0f && _isRunning)
         {
             yield return null;
-            _TimeRemaining -= Time.deltaTime;
+            _timeRemaining -= Time.deltaTime;
 
-            if (_TimeRemaining < 0f) _TimeRemaining = 0f;
+            if (_timeRemaining < 0f) _timeRemaining = 0f;
             UpdateTimeUI();
 
-            _OnDifficultyChanged?.Invoke(GetDifficultyMultiplier());
+            OnDifficultyChanged?.Invoke(GetDifficultyMultiplier());
         }
         EndGame();
     }
+    #endregion
 
-    private Coroutine _perfectCoroutine = null;
+    #region Perfect Popup
     private void ShowPerfectPopup()
     {
         if (_perfectPopup == null)
@@ -272,7 +311,73 @@ public class GameManager : MonoBehaviour
         _perfectPopup.SetActive(false);
         _perfectCoroutine = null;
     }
+    #endregion
 
+    #region Ring movement
+    private void ToggleRingMovement()
+    {
+        SetRingMovement(!_ringMovementActive);
+    }
+
+    private void SetRingMovement(bool active)
+    {
+        _ringMovementActive = active;
+        _scoreMultiplier = active ? 2f : 1f;
+
+        if (_basketRingMover != null)
+        {
+            if (active) _basketRingMover.StartMovement();
+            else _basketRingMover.StopMovement();
+        }
+    }
+    #endregion
+
+    #region Ball selection panel control (pause/resume)
+    public void ShowBallSelection()
+    {
+        if (!_isRunning) return; 
+
+        if (_ballSelectionPanel != null)
+            _ballSelectionPanel.SetActive(true);
+        if (_ballWheelController != null)
+            _ballWheelController.CollectItems();
+
+        _prevTimeScale = Time.timeScale;
+        Time.timeScale = 0f;
+        _isPausedByBallSelection = true;
+    }
+
+    public void HideBallSelection(bool confirmed = false, int selectedIndex = -1)
+    {
+        if (_ballSelectionPanel != null)
+            _ballSelectionPanel.SetActive(false);
+
+        Time.timeScale = _prevTimeScale;
+        _isPausedByBallSelection = false;
+
+        if (confirmed && selectedIndex >= 0)
+        {
+            ApplySelectedBall(selectedIndex);
+        }
+    }
+
+    public void ApplySelectedBall(int index)
+    {
+        Debug.Log($"GameManager: ApplySelectedBall({index}) called.");
+    }
+    #endregion
+
+    #region Sound Helpers
+    private void PlayButtonClickSound()
+    {
+        if (_audioSource != null && _buttonClickSound != null)
+        {
+            _audioSource.PlayOneShot(_buttonClickSound);
+        }
+    }
+    #endregion
+
+    #region Debug Utilities
     [ContextMenu("Debug: Start Game")]
     public void DebugStartGame() => StartGame();
 
@@ -283,7 +388,8 @@ public class GameManager : MonoBehaviour
     public void DebugResetHighscore()
     {
         PlayerPrefs.DeleteKey(_highscoreKey);
-        _Highscore = 0;
+        _highscore = 0;
         UpdateHighscoreUI();
     }
+    #endregion
 }
