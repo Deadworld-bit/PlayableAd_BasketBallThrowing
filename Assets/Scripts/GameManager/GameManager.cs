@@ -32,18 +32,24 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button _retryButton;
     [SerializeField] private TMP_Text _endScoreText;
 
-    public bool IsRunning { get; private set; }
-    public float TimeRemaining { get; private set; }
-    public int Score { get; private set; } = 0;
-    public int Highscore { get; private set; } = 0;
+    [Header("Ring movement")]
+    [SerializeField] private Button _moveRingButton;                   
+    [SerializeField] private BasketRingMover _basketRingMover;
+    public float ScoreMultiplier { get; private set; } = 1f;
 
-    public event Action<float> OnTimeChanged;
-    public event Action<int> OnScoreChanged;
-    public event Action<float> OnDifficultyChanged;
-    public event Action OnGameStarted;
-    public event Action OnGameEnded;
+    public bool _IsRunning { get; private set; }
+    public float _TimeRemaining { get; private set; }
+    public int _Score { get; private set; } = 0;
+    public int _Highscore { get; private set; } = 0;
+
+    public event Action<float> _OnTimeChanged;
+    public event Action<int> _OnScoreChanged;
+    public event Action<float> _OnDifficultyChanged;
+    public event Action _OnGameStarted;
+    public event Action _OnGameEnded;
 
     private Coroutine _timerCoroutine;
+    private bool _ringMovementActive = false;
 
     private void Awake()
     {
@@ -67,13 +73,22 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("GameManager: scoreText is not assigned in the Inspector!");
         }
-        // NEW: Check new UI references
         if (_startPanel == null || _endPanel == null || _startButton == null || _retryButton == null || _endScoreText == null)
         {
             Debug.LogError("GameManager: One or more start/end UI elements are not assigned!");
         }
 
-        Highscore = PlayerPrefs.GetInt(_highscoreKey, 0);
+        if (_moveRingButton == null)
+        {
+            Debug.LogWarning("GameManager: moveRingButton not assigned - ring move UI will not work.");
+        }
+        else
+        {
+            _moveRingButton.gameObject.SetActive(false);
+            _moveRingButton.onClick.AddListener(ToggleRingMovement);
+        }
+
+        _Highscore = PlayerPrefs.GetInt(_highscoreKey, 0);
         UpdateHighscoreUI();
         if (_perfectPopup != null) _perfectPopup.SetActive(false);
 
@@ -101,11 +116,15 @@ public class GameManager : MonoBehaviour
     private void OnDestroy()
     {
         if (_Instance == this) _Instance = null;
+        if (_moveRingButton != null)
+        {
+            _moveRingButton.onClick.RemoveListener(ToggleRingMovement);
+        }
     }
 
     private void UpdateHighscoreUI()
     {
-        SetTextSafe(_highestText, $"{Highscore}");
+        SetTextSafe(_highestText, $"{_Highscore}");
     }
 
     private void SetTextSafe(object uiText, string text)
@@ -117,12 +136,12 @@ public class GameManager : MonoBehaviour
 
     private void UpdateScoreUI()
     {
-        SetTextSafe(_scoreText, $"{Score}");
+        SetTextSafe(_scoreText, $"{_Score}");
     }
 
     private void UpdateTimeUI()
     {
-        int sec = Mathf.CeilToInt(TimeRemaining);
+        int sec = Mathf.CeilToInt(_TimeRemaining);
         int minutes = sec / 60;
         int seconds = sec % 60;
         SetTextSafe(_timeText, $"{minutes:00}:{seconds:00}");
@@ -130,15 +149,16 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
-        Score = 0;
-        TimeRemaining = _gameDuration;
-        IsRunning = true;
+        _Score = 0;
+        _TimeRemaining = _gameDuration;
+        _IsRunning = true;
         UpdateScoreUI();
         UpdateTimeUI();
 
         if (_endPanel != null) _endPanel.SetActive(false);
+        if (_moveRingButton != null) _moveRingButton.gameObject.SetActive(true);
 
-        OnGameStarted?.Invoke();
+        _OnGameStarted?.Invoke();
 
         if (_timerCoroutine != null) StopCoroutine(_timerCoroutine);
         _timerCoroutine = StartCoroutine(GameTimerCoroutine());
@@ -146,61 +166,81 @@ public class GameManager : MonoBehaviour
 
     public void EndGame()
     {
-        if (!IsRunning) return;
+        if (!_IsRunning) return;
 
-        IsRunning = false;
+        _IsRunning = false;
         if (_timerCoroutine != null) StopCoroutine(_timerCoroutine);
         _timerCoroutine = null;
-        if (Score > Highscore)
+        SetRingMovement(false);
+
+        if (_Score > _Highscore)
         {
-            Highscore = Score;
-            PlayerPrefs.SetInt(_highscoreKey, Highscore);
+            _Highscore = _Score;
+            PlayerPrefs.SetInt(_highscoreKey, _Highscore);
             PlayerPrefs.Save();
             UpdateHighscoreUI();
         }
         if (_endPanel != null) _endPanel.SetActive(true);
-        if (_endScoreText != null) _endScoreText.text = $"Score: {Score}";
+        if (_endScoreText != null) _endScoreText.text = $"Score: {_Score}";
+        if (_moveRingButton != null) _moveRingButton.gameObject.SetActive(false);
 
-        OnGameEnded?.Invoke();
+        _OnGameEnded?.Invoke();
+    }
+
+    private void SetRingMovement(bool active)
+    {
+        _ringMovementActive = active;
+        ScoreMultiplier = active ? 2f : 1f;
+
+        if (_basketRingMover != null)
+        {
+            if (active) _basketRingMover.StartMovement();
+            else _basketRingMover.StopMovement();
+        }
     }
 
     public void AddScore(int points, bool perfect = false)
     {
-        if (!IsRunning)
+        if (!_IsRunning)
         {
             Debug.Log("AddScore called while game is not running; ignoring.");
             return;
         }
 
-        Score += points;
+        int pointsToAdd = Mathf.RoundToInt(points * ScoreMultiplier);
+        _Score += pointsToAdd;
         UpdateScoreUI();
-        OnScoreChanged?.Invoke(Score);
-
+        _OnScoreChanged?.Invoke(_Score);
         if (perfect)
         {
             ShowPerfectPopup();
         }
     }
 
+    private void ToggleRingMovement()
+    {
+        SetRingMovement(!_ringMovementActive);
+    }
+
     public float GetDifficultyMultiplier()
     {
-        if (!IsRunning) return difficultyCurve.Evaluate(0f);
-        float normalized = 1f - (TimeRemaining / Mathf.Max(1f, _gameDuration));
+        if (!_IsRunning) return difficultyCurve.Evaluate(0f);
+        float normalized = 1f - (_TimeRemaining / Mathf.Max(1f, _gameDuration));
         float mul = difficultyCurve.Evaluate(Mathf.Clamp01(normalized));
         return mul;
     }
 
     private IEnumerator GameTimerCoroutine()
     {
-        while (TimeRemaining > 0f && IsRunning)
+        while (_TimeRemaining > 0f && _IsRunning)
         {
             yield return null;
-            TimeRemaining -= Time.deltaTime;
+            _TimeRemaining -= Time.deltaTime;
 
-            if (TimeRemaining < 0f) TimeRemaining = 0f;
+            if (_TimeRemaining < 0f) _TimeRemaining = 0f;
             UpdateTimeUI();
 
-            OnDifficultyChanged?.Invoke(GetDifficultyMultiplier());
+            _OnDifficultyChanged?.Invoke(GetDifficultyMultiplier());
         }
         EndGame();
     }
@@ -243,7 +283,7 @@ public class GameManager : MonoBehaviour
     public void DebugResetHighscore()
     {
         PlayerPrefs.DeleteKey(_highscoreKey);
-        Highscore = 0;
+        _Highscore = 0;
         UpdateHighscoreUI();
     }
 }
