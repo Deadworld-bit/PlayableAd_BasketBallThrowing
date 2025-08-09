@@ -2,9 +2,6 @@ using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
-#if TMP_PRESENT
-using TMPro;
-#endif
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -12,22 +9,29 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     [Header("Game settings")]
-    public float gameDuration = 60f;               
+    public float gameDuration = 60f;
     [Tooltip("Curve 0..1 over normalized time (0=start,1=end) used to compute difficulty multiplier")]
     public AnimationCurve difficultyCurve = AnimationCurve.Linear(0f, 1f, 1f, 1.6f);
 
     [Header("UI - use TextMeshPro if available; otherwise assign Unity UI Text")]
-
     public TMP_Text highestText;
     public TMP_Text timeText;
     public TMP_Text scoreText;
 
     [Header("Perfect dunk popup")]
-    public GameObject perfectPopup;                
+    public GameObject perfectPopup;
     public float perfectPopupDuration = 1.0f;
 
     [Header("Highscore")]
     public string highscoreKey = "Highscore";
+
+    // NEW: References to start and end screens
+    [Header("Start/End Screens")]
+    public GameObject startPanel;
+    public GameObject endPanel;
+    public Button startButton;  // Assign the StartButton in Inspector
+    public Button retryButton;  // Assign the RetryButton in Inspector
+    public TMP_Text endScoreText;  // Assign the EndScoreText in Inspector
 
     // runtime state
     public bool IsRunning { get; private set; }
@@ -66,14 +70,42 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("GameManager: scoreText is not assigned in the Inspector!");
         }
+        // NEW: Check new UI references
+        if (startPanel == null || endPanel == null || startButton == null || retryButton == null || endScoreText == null)
+        {
+            Debug.LogError("GameManager: One or more start/end UI elements are not assigned!");
+        }
+
         Highscore = PlayerPrefs.GetInt(highscoreKey, 0);
         UpdateHighscoreUI();
         if (perfectPopup != null) perfectPopup.SetActive(false);
+
+        // NEW: Set initial panel states (start shown, end hidden)
+        if (startPanel != null) startPanel.SetActive(true);
+        if (endPanel != null) endPanel.SetActive(false);
+
+        // NEW: Add button listeners
+        if (startButton != null)
+        {
+            startButton.onClick.AddListener(() =>
+            {
+                StartGame();
+                if (startPanel != null) startPanel.SetActive(false);
+            });
+        }
+        if (retryButton != null)
+        {
+            retryButton.onClick.AddListener(() =>
+            {
+                StartGame();
+                if (endPanel != null) endPanel.SetActive(false);
+            });
+        }
     }
 
     private void Start()
     {
-        StartGame();
+        // REMOVED: StartGame();  // Don't start automatically; wait for button click
     }
 
     private void OnDestroy()
@@ -83,7 +115,7 @@ public class GameManager : MonoBehaviour
 
     private void UpdateHighscoreUI()
     {
-        SetTextSafe(highestText, $"HIGHEST\n{Highscore}");
+        SetTextSafe(highestText, $"{Highscore}");
     }
 
     private void SetTextSafe(object uiText, string text)
@@ -95,7 +127,7 @@ public class GameManager : MonoBehaviour
 
     private void UpdateScoreUI()
     {
-        SetTextSafe(scoreText, $"SCORE\n{Score}");
+        SetTextSafe(scoreText, $"{Score}");
     }
 
     private void UpdateTimeUI()
@@ -113,6 +145,9 @@ public class GameManager : MonoBehaviour
         IsRunning = true;
         UpdateScoreUI();
         UpdateTimeUI();
+
+        // NEW: Hide end panel if retrying
+        if (endPanel != null) endPanel.SetActive(false);
 
         OnGameStarted?.Invoke();
 
@@ -134,6 +169,10 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.Save();
             UpdateHighscoreUI();
         }
+
+        // NEW: Show end panel and update score text
+        if (endPanel != null) endPanel.SetActive(true);
+        if (endScoreText != null) endScoreText.text = $"Score: {Score}";
 
         OnGameEnded?.Invoke();
     }
@@ -182,7 +221,7 @@ public class GameManager : MonoBehaviour
     private Coroutine _perfectCoroutine = null;
     private void ShowPerfectPopup()
     {
-        if (perfectPopup == null) 
+        if (perfectPopup == null)
         {
             Debug.LogWarning("GameManager: perfectPopup is not assigned, cannot show popup.");
             return;
