@@ -96,19 +96,18 @@ public class DunkDetector : MonoBehaviour
             }
         }
 
-        // scoring
-        // int scoreToAdd = perfect ? perfectDunkScore : normalDunkScore;
-        // if (GameManager.Instance != null)
-        // {
-        //     GameManager.Instance.AddScore(scoreToAdd);
-        // }
-        // else
-        // {
-        //     Debug.LogWarning($"GameManager.Instance is null. Would have added {scoreToAdd} points.");
-        // }
+        int scoreToAdd = perfect ? _perfectDunkScore : _normalDunkScore;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.AddScore(scoreToAdd, perfect);
+        }
+        else
+        {
+            Debug.LogWarning($"GameManager.Instance is null. Would have added {scoreToAdd} points.");
+        }
 
-        // _alreadyScored.Add(ball);
-        // StartCoroutine(RemoveScoreFlagAfter(ball, 2f));
+        _alreadyScored.Add(ball);
+        StartCoroutine(RemoveScoreFlagAfter(ball, 2f));
     }
 
     private System.Collections.IEnumerator RemoveScoreFlagAfter(GameObject ball, float delay)
