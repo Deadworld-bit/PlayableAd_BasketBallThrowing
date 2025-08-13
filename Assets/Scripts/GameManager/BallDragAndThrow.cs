@@ -38,8 +38,9 @@ public class BallDragAndThrow : MonoBehaviour
     private Vector3 _initialScreenPos;
     private Vector2 _dragStartScreenPos;
     private Vector3 _dragStartWorldPoint;
+    private Vector3 _dragTargetPos;
 
-    private const float MIN_DRAG_DISTANCE = 0.02f; 
+    private const float MIN_DRAG_DISTANCE = 0.02f;
 
     void Update()
     {
@@ -55,6 +56,16 @@ public class BallDragAndThrow : MonoBehaviour
         }
     }
 
+    // Move the kinematic rigidbody toward the target in FixedUpdate (physics step)
+    private void FixedUpdate()
+    {
+        if (_selectedRb != null && _selectedRb.isKinematic)
+        {
+            Vector3 nextPos = Vector3.Lerp(_selectedRb.position, _dragTargetPos, Time.fixedDeltaTime * _dragSensitivity);
+            _selectedRb.MovePosition(nextPos);
+        }
+    }
+
     // Start dragging the ball
     private void TryBeginDrag(Vector2 screenPos)
     {
@@ -63,35 +74,54 @@ public class BallDragAndThrow : MonoBehaviour
 
         _selectedBall = hit.transform;
         _selectedRb = _selectedBall.GetComponent<Rigidbody>();
+        if (_selectedRb == null)
+        {
+            Debug.LogWarning("BallDragAndThrow: selected object has no Rigidbody.");
+            _selectedBall = null;
+            return;
+        }
 
         _selectedRb.isKinematic = true;
-        _selectedRb.useGravity = true;
-
+        _selectedRb.useGravity = false;
         _initialScreenPos = _camera.WorldToScreenPoint(_selectedBall.position);
         _dragStartScreenPos = screenPos;
         _dragStartWorldPoint = ScreenToWorldAtDepth(_dragStartScreenPos, _initialScreenPos.z);
+        _dragTargetPos = _selectedRb.position;
 
-        _touchTrail.SetActive(true);
+        if (_touchTrail != null)
+        {
+            _touchTrail.SetActive(true);
+            _touchTrail.transform.position = _dragTargetPos;
+        }
+
         PlaySound(_clickSound);
     }
 
-    // Move the ball with the drag
+    // Move the ball with the drag 
     private void ContinueDrag(Vector2 screenPos)
     {
-        Vector3 targetWorldPos = ScreenToWorldAtDepth(screenPos, _initialScreenPos.z);
-        _selectedBall.position = Vector3.Lerp(_selectedBall.position, targetWorldPos, Time.deltaTime * _dragSensitivity);
-        _touchTrail.transform.position = targetWorldPos;
+        _dragTargetPos = ScreenToWorldAtDepth(screenPos, _initialScreenPos.z);
+
+        if (_touchTrail != null)
+            _touchTrail.transform.position = _dragTargetPos;
     }
 
     // Release the ball and apply force
     private void EndDrag(Vector2 releaseScreenPos)
     {
+        if (_selectedRb == null)
+        {
+            Cleanup();
+            PlaySound(_releaseSound);
+            return;
+        }
+
         Vector3 releaseWorldPoint = ScreenToWorldAtDepth(releaseScreenPos, _initialScreenPos.z);
         Vector3 worldDelta = releaseWorldPoint - _dragStartWorldPoint;
 
-        // Ignore tiny drags
         if (worldDelta.magnitude < MIN_DRAG_DISTANCE)
         {
+            RestorePhysicsAfterDrag();
             Cleanup();
             PlaySound(_releaseSound);
             return;
@@ -111,6 +141,8 @@ public class BallDragAndThrow : MonoBehaviour
     // Apply calculated velocity and spin to the ball
     private void ApplyThrowForce(Vector2 dragStart, Vector2 dragEnd, Vector3 worldDelta)
     {
+        if (_selectedRb == null) return;
+
         Vector2 screenDelta = dragEnd - dragStart;
         float dpi = (Screen.dpi > 0) ? Screen.dpi : 160f;
         float baseScale = (_maxLaunchForce / dpi) * _gentleFactor;
@@ -130,12 +162,13 @@ public class BallDragAndThrow : MonoBehaviour
         if (launchVelocity.magnitude > maxSpeed)
             launchVelocity = launchVelocity.normalized * maxSpeed;
 
-        // Apply to Rigidbody
+        // Restore physics and apply velocity
         _selectedRb.isKinematic = false;
+        _selectedRb.useGravity = true;
+
         _selectedRb.velocity = Vector3.zero;
         _selectedRb.AddForce(launchVelocity, ForceMode.VelocityChange);
 
-        // Optional spin
         if (_spinTorque != 0f)
         {
             Vector3 spin = new Vector3(-worldDelta.z, 0f, worldDelta.x).normalized * _spinTorque;
@@ -150,11 +183,29 @@ public class BallDragAndThrow : MonoBehaviour
             _audioSource.PlayOneShot(clip);
     }
 
+    // Restore physics state in case we bail out without throwing
+    private void RestorePhysicsAfterDrag()
+    {
+        if (_selectedRb == null) return;
+        _selectedRb.isKinematic = false;
+        _selectedRb.useGravity = true;
+    }
+
     // Reset drag state
     private void Cleanup()
     {
-        _touchTrail.SetActive(false);
+        if (_touchTrail != null) _touchTrail.SetActive(false);
         _selectedBall = null;
         _selectedRb = null;
+        _dragTargetPos = Vector3.zero;
+    }
+
+    private void OnDisable()
+    {
+        if (_selectedRb != null)
+        {
+            _selectedRb.isKinematic = false;
+            _selectedRb.useGravity = true;
+        }
     }
 }
