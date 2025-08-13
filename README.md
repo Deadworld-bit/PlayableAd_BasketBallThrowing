@@ -29,7 +29,32 @@
   - Enable Basket Movement Mode:	Click/tap difficulty button
   - Retry Game:	Click/tap retry button
 
+## Logic
+### Trajectory & Force Calculation
+  #### Drag Delta: determines throw direction and throw strength.
+  ```bash
+   dragDelta = releasePosition − dragStartPosition.
+  ```
 
+  #### Drag distance (dragDist) is proportional to force magnitude:
+  ```bash
+   forceMag = dragDist × (maxLaunchForce/Screen.dpi) × gentleFactor.
+  ```
+  - maxLaunchForce → caps max throw power.
+  - gentleFactor → scales force for smoother throws.
+  - Screen.dpi → normalizes throw speed across devices.
+
+  #### Forward & Upward Motion: Direction vector combines camera forward and camera up
+  ```bash
+    dir = normalize(F × forwardRatio + U × upwardRatio).
+  ```
+  ```bash
+    forwardRatio = 1 − verticalRatio.
+  ```
+  ```bash
+    verticalRatio = Clamp01(dragDelta.y/dragDist) x upwardBiasFactor.
+  ```
+  - This ensures the ball always has both forward push and upward arc, simulating a real basketball throw.
 ## Defect Feature In Fix
   - Choosing balls.
 
