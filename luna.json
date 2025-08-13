@@ -29969,7 +29969,7 @@
                     },
                     {
                         "name": "OnTriggerEnter",
-                        "excluded": true
+                        "excluded": false
                     }
                 ]
             },

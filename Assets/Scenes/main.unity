@@ -1026,7 +1026,7 @@ MonoBehaviour:
   _audioSource: {fileID: 595421159}
   _clickSound: {fileID: 8300000, guid: 0f3790560d9cc084000000000000006f, type: 3}
   _releaseSound: {fileID: 8300000, guid: b88c5f560d9ccaaf0000000000000051, type: 3}
-  _maxLaunchForce: 200
+  _maxLaunchForce: 150
   _dragSensitivity: 10
   _upwardBiasFactor: 0.5
   _gentleFactor: 0.1
@@ -1057,7 +1057,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a575c8569a161b040a554b251a01df81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gameDuration: 10
+  _gameDuration: 60
   _highestText: {fileID: 1951470723}
   _timeText: {fileID: 745630021}
   _scoreText: {fileID: 680532621}
