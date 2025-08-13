@@ -111,7 +111,6 @@ public class BallWheelController : MonoBehaviour, IPointerDownHandler, IDragHand
             }
         }
 
-        // keep degrees normalized
         _rotationDeg = Mathf.Repeat(_rotationDeg, 360f);
         UpdateAllSelection();
     }

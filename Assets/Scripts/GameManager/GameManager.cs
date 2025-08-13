@@ -8,6 +8,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager _Instance { get; private set; }
 
+    #region Inspector Fields
+
     [Header("Game settings")]
     [SerializeField] private float _gameDuration = 120f;
 
@@ -30,50 +32,95 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button _retryButton;
     [SerializeField] private TMP_Text _endScoreText;
 
-    [Header("Ring movement ")]
-    [SerializeField] private Button _moveRingButton;                 
-    [SerializeField] private BasketRingMover _basketRingMover;   
+    [Header("Ring movement")]
+    [SerializeField] private Button _moveRingButton;
+    [SerializeField] private BasketRingMover _basketRingMover;
 
     [Header("Ball selection UI")]
-    [SerializeField] private Button _openBallSelectButton;    
-    [SerializeField] private GameObject _ballSelectionPanel;  
-    [SerializeField] private BallWheelController _ballWheelController; 
+    [SerializeField] private Button _openBallSelectButton;
+    [SerializeField] private GameObject _ballSelectionPanel;
+    [SerializeField] private BallWheelController _ballWheelController;
 
     [Header("Sound Effects")]
-    [SerializeField] private AudioSource _audioSource; 
-    [SerializeField] private AudioClip _buttonClickSound; 
-    [SerializeField] private AudioClip _gameCompleteSound; 
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip _buttonClickSound;
+    [SerializeField] private AudioClip _gameCompleteSound;
+
+    #endregion
+
+    #region Public State (read-only settable)
 
     public bool _isRunning { get; private set; }
     public float _timeRemaining { get; private set; }
     public int _score { get; private set; } = 0;
     public int _highscore { get; private set; } = 0;
 
-    // 1 = normal, 2 = double
     public float _scoreMultiplier { get; private set; } = 1f;
 
     public event Action<int> OnScoreChanged;
     public event Action OnGameStarted;
     public event Action OnGameEnded;
 
+    #endregion
+
+    #region Private internals
+
     private Coroutine _timerCoroutine;
     private Coroutine _perfectCoroutine = null;
     private bool _ringMovementActive = false;
 
-
     private bool _isPausedByBallSelection = false;
     private float _prevTimeScale = 1f;
 
+    #endregion
+
+    #region Unity lifecycle
+
     private void Awake()
+    {
+        if (!TryInitializeSingleton()) return;
+        ValidateInspectorAssignments();
+
+        InitializeUIState();
+        InitializeButtons();
+
+        _highscore = PlayerPrefs.GetInt(_highscoreKey, 0);
+        UpdateHighscoreUI();
+        if (_perfectPopup != null) _perfectPopup.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        if (_Instance == this) _Instance = null;
+
+        if (_moveRingButton != null)
+        {
+            _moveRingButton.onClick.RemoveListener(ToggleRingMovement);
+        }
+        if (_openBallSelectButton != null)
+        {
+            _openBallSelectButton.onClick.RemoveAllListeners();
+        }
+    }
+
+    #endregion
+
+    #region Initialization helpers
+
+    private bool TryInitializeSingleton()
     {
         if (_Instance != null && _Instance != this)
         {
             Destroy(gameObject);
-            return;
+            return false;
         }
         _Instance = this;
         DontDestroyOnLoad(gameObject);
+        return true;
+    }
 
+    private void ValidateInspectorAssignments()
+    {
         if (_highestText == null) Debug.LogError("GameManager: highestText is not assigned in the Inspector!");
         if (_timeText == null) Debug.LogError("GameManager: timeText is not assigned in the Inspector!");
         if (_scoreText == null) Debug.LogError("GameManager: scoreText is not assigned in the Inspector!");
@@ -81,10 +128,22 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("GameManager: One or more start/end UI elements are not assigned!");
         }
+    }
 
+    private void InitializeUIState()
+    {
+        if (_startPanel != null) _startPanel.SetActive(true);
+        if (_endPanel != null) _endPanel.SetActive(false);
+
+        if (_moveRingButton != null) _moveRingButton.gameObject.SetActive(false);
+        if (_openBallSelectButton != null) _openBallSelectButton.gameObject.SetActive(false);
+        if (_ballSelectionPanel != null) _ballSelectionPanel.SetActive(false);
+    }
+
+    private void InitializeButtons()
+    {
         if (_moveRingButton != null)
         {
-            _moveRingButton.gameObject.SetActive(false);
             _moveRingButton.onClick.AddListener(() =>
             {
                 PlayButtonClickSound();
@@ -94,22 +153,12 @@ public class GameManager : MonoBehaviour
 
         if (_openBallSelectButton != null)
         {
-            _openBallSelectButton.gameObject.SetActive(false);
             _openBallSelectButton.onClick.AddListener(() =>
             {
                 PlayButtonClickSound();
                 ShowBallSelection();
             });
         }
-        if (_ballSelectionPanel != null)
-            _ballSelectionPanel.SetActive(false);
-
-        _highscore = PlayerPrefs.GetInt(_highscoreKey, 0);
-        UpdateHighscoreUI();
-        if (_perfectPopup != null) _perfectPopup.SetActive(false);
-
-        if (_startPanel != null) _startPanel.SetActive(true);
-        if (_endPanel != null) _endPanel.SetActive(false);
 
         if (_startButton != null)
         {
@@ -120,6 +169,7 @@ public class GameManager : MonoBehaviour
                 if (_startPanel != null) _startPanel.SetActive(false);
             });
         }
+
         if (_retryButton != null)
         {
             _retryButton.onClick.AddListener(() =>
@@ -131,30 +181,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
-    {
-        if (_Instance == this) _Instance = null;
-        if (_moveRingButton != null)
-        {
-            _moveRingButton.onClick.RemoveListener(ToggleRingMovement);
-        }
-        if (_openBallSelectButton != null)
-        {
-            _openBallSelectButton.onClick.RemoveAllListeners();
-        }
-    }
+    #endregion
 
     #region UI Helpers
+
     private void UpdateHighscoreUI()
     {
         SetTextSafe(_highestText, $"{_highscore}");
-    }
-
-    private void SetTextSafe(object uiText, string text)
-    {
-        if (uiText == null) return;
-        if (uiText is TMP_Text t) t.text = text;
-        else if (uiText is Text u) u.text = text;
     }
 
     private void UpdateScoreUI()
@@ -169,9 +202,18 @@ public class GameManager : MonoBehaviour
         int seconds = sec % 60;
         SetTextSafe(_timeText, $"{minutes:00}:{seconds:00}");
     }
+
+    private void SetTextSafe(object uiText, string text)
+    {
+        if (uiText == null) return;
+        if (uiText is TMP_Text t) t.text = text;
+        else if (uiText is Text u) u.text = text;
+    }
+
     #endregion
 
     #region Game Control
+
     public void StartGame()
     {
         _score = 0;
@@ -197,6 +239,7 @@ public class GameManager : MonoBehaviour
         _isRunning = false;
         if (_timerCoroutine != null) StopCoroutine(_timerCoroutine);
         _timerCoroutine = null;
+
         SetRingMovement(false);
 
         if (_audioSource != null && _gameCompleteSound != null)
@@ -214,6 +257,7 @@ public class GameManager : MonoBehaviour
 
         if (_endPanel != null) _endPanel.SetActive(true);
         if (_endScoreText != null) _endScoreText.text = $"Score: {_score}";
+
         if (_moveRingButton != null) _moveRingButton.gameObject.SetActive(false);
         if (_ballSelectionPanel != null) _ballSelectionPanel.SetActive(false);
         if (_openBallSelectButton != null) _openBallSelectButton.gameObject.SetActive(false);
@@ -226,9 +270,11 @@ public class GameManager : MonoBehaviour
 
         OnGameEnded?.Invoke();
     }
+
     #endregion
 
     #region Scoring
+
     public void AddScore(int points, bool perfect = false)
     {
         if (!_isRunning)
@@ -253,9 +299,11 @@ public class GameManager : MonoBehaviour
             ShowPerfectPopup();
         }
     }
+
     #endregion
 
     #region Timer
+
     private IEnumerator GameTimerCoroutine()
     {
         while (_timeRemaining > 0f && _isRunning)
@@ -268,9 +316,11 @@ public class GameManager : MonoBehaviour
         }
         EndGame();
     }
+
     #endregion
 
-    #region Perfect Popup
+    #region Perfect popup
+
     private void ShowPerfectPopup()
     {
         if (_perfectPopup == null)
@@ -297,9 +347,11 @@ public class GameManager : MonoBehaviour
         _perfectPopup.SetActive(false);
         _perfectCoroutine = null;
     }
+
     #endregion
 
-    #region Ring movement
+    #region Ring movement (UI toggle + wiring to BasketRingMover)
+
     private void ToggleRingMovement()
     {
         SetRingMovement(!_ringMovementActive);
@@ -316,12 +368,14 @@ public class GameManager : MonoBehaviour
             else _basketRingMover.StopMovement();
         }
     }
+
     #endregion
 
-    #region Ball selection panel control (pause/resume)
+    #region Ball selection (pause/resume)
+
     public void ShowBallSelection()
     {
-        if (!_isRunning) return; 
+        if (!_isRunning) return;
 
         if (_ballSelectionPanel != null)
             _ballSelectionPanel.SetActive(true);
@@ -351,9 +405,11 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log($"GameManager: ApplySelectedBall({index}) called.");
     }
+
     #endregion
 
     #region Sound Helpers
+
     private void PlayButtonClickSound()
     {
         if (_audioSource != null && _buttonClickSound != null)
@@ -361,9 +417,11 @@ public class GameManager : MonoBehaviour
             _audioSource.PlayOneShot(_buttonClickSound);
         }
     }
+
     #endregion
 
     #region Debug Utilities
+
     [ContextMenu("Debug: Start Game")]
     public void DebugStartGame() => StartGame();
 
@@ -377,5 +435,6 @@ public class GameManager : MonoBehaviour
         _highscore = 0;
         UpdateHighscoreUI();
     }
+
     #endregion
 }

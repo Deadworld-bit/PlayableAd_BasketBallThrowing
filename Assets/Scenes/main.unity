@@ -345,8 +345,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 11.012572, y: 15.695688, z: 4.5029354}
-  m_Center: {x: 0.21512651, y: 3.2070627, z: -1.7514677}
+  m_Size: {x: 11.012572, y: 18.931824, z: 4.5029354}
+  m_Center: {x: 0.21512651, y: 4.8251247, z: -1.7514677}
 --- !u!4 &234944587
 Transform:
   m_ObjectHideFlags: 0
@@ -356,7 +356,7 @@ Transform:
   m_GameObject: {fileID: 234944585}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -21.5}
+  m_LocalPosition: {x: 0, y: 0.6, z: -18.48}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1023,13 +1023,17 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   _touchTrail: {fileID: 2878013518701920564}
+  _maxLaunchForce: 20
+  _dragSensitivity: 10
+  _upwardBiasFactor: 15
+  _gentleFactor: 0.4
+  _forwardMultiplier: 0.5
+  _verticalMultiplier: 0.045
+  _horizontalMultiplier: 0.03
   _audioSource: {fileID: 595421159}
   _clickSound: {fileID: 8300000, guid: 0f3790560d9cc084000000000000006f, type: 3}
   _releaseSound: {fileID: 8300000, guid: b88c5f560d9ccaaf0000000000000051, type: 3}
-  _maxLaunchForce: 150
-  _dragSensitivity: 10
-  _upwardBiasFactor: 0.5
-  _gentleFactor: 0.1
+  _spinTorque: 2
 --- !u!4 &595421157
 Transform:
   m_ObjectHideFlags: 0
