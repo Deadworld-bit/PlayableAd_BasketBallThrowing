@@ -21,19 +21,20 @@ public class GameManager : MonoBehaviour
 #endif
 
     [Header("References (assign in inspector or will be found automatically)")]
-    public ScoreManager scoreManager;
-    public TimerManager timerManager;
-    public UIManager uiManager;
-    public RingMovementController ringMovementController;
-    public BallSelectionController ballSelectionController;
-    public SoundManager soundManager;
+    public ScoreManager _scoreManager;
+    [SerializeField] private TimerManager _timerManager;
+    public UIManager _uiManager;
+    [SerializeField] private BasketRingMover _ringMovementController;
+    [SerializeField] private BallSelectionController _ballSelectionController;
+    public SoundManager _soundManager;
 
     [Header("Game settings")]
-    public int maxPlays = 2;
+    [SerializeField] private int _maxPlays = 2;
 
-    public bool IsRunning { get; private set; }
+    public bool _isRunning { get; private set; }
 
-    private int gamesPlayed = 0;
+    private int _gamesPlayed = 0;
+    private bool _ringIsMoving = false;
 
     public event Action OnGameStarted;
     public event Action OnGameEnded;
@@ -53,82 +54,82 @@ public class GameManager : MonoBehaviour
     {
         TryAutoFindReferences();
 
-        if (uiManager != null)
+        if (_uiManager != null)
         {
-            uiManager._onStartButtonPressed += StartGame;
-            uiManager._onRetryButtonPressed += StartGame;
+            _uiManager._onStartButtonPressed += StartGame;
+            _uiManager._onRetryButtonPressed += StartGame;
+            _uiManager._onMoveButtonPressed += ToggleRingMovement;
         }
         else
         {
             Debug.LogWarning("GameManager: uiManager is null after TryAutoFindReferences(). Assign it in Inspector or ensure a UIManager exists in the scene.");
         }
 
-        if (ballSelectionController != null)
-            ballSelectionController.onSelectionConfirmed += index => ApplySelectedBall(index);
+        if (_ballSelectionController != null)
+            _ballSelectionController.onSelectionConfirmed += index => ApplySelectedBall(index);
 
-        SubscribeScoreToUI();    
-        uiManager?.ShowStartUI();
+        SubscribeScoreToUI();
+        _uiManager?.ShowStartUI();
     }
 
     private void TryAutoFindReferences()
     {
-        if (uiManager == null)
+        if (_uiManager == null)
         {
-            uiManager = FindObjectOfType<UIManager>();
-            Debug.Log($"GameManager: auto-found UIManager -> {(uiManager != null ? "found" : "NOT FOUND")}");
+            _uiManager = FindObjectOfType<UIManager>();
+            Debug.Log($"GameManager: auto-found UIManager -> {(_uiManager != null ? "found" : "NOT FOUND")}");
         }
-        if (timerManager == null)
+        if (_timerManager == null)
         {
-            timerManager = FindObjectOfType<TimerManager>();
-            Debug.Log($"GameManager: auto-found TimerManager -> {(timerManager != null ? "found" : "NOT FOUND")}");
+            _timerManager = FindObjectOfType<TimerManager>();
+            Debug.Log($"GameManager: auto-found TimerManager -> {(_timerManager != null ? "found" : "NOT FOUND")}");
         }
-        if (scoreManager == null)
+        if (_scoreManager == null)
         {
-            scoreManager = FindObjectOfType<ScoreManager>();
-            Debug.Log($"GameManager: auto-found ScoreManager -> {(scoreManager != null ? "found" : "NOT FOUND")}");
+            _scoreManager = FindObjectOfType<ScoreManager>();
+            Debug.Log($"GameManager: auto-found ScoreManager -> {(_scoreManager != null ? "found" : "NOT FOUND")}");
         }
-        if (ringMovementController == null)
+        if (_ringMovementController == null)
         {
-            ringMovementController = FindObjectOfType<RingMovementController>();
-            Debug.Log($"GameManager: auto-found RingMovementController -> {(ringMovementController != null ? "found" : "NOT FOUND")}");
+            _ringMovementController = FindObjectOfType<BasketRingMover>();
+            Debug.Log($"GameManager: auto-found BasketRingMover -> {(_ringMovementController != null ? "found" : "NOT FOUND")}");
         }
-        if (ballSelectionController == null)
+        if (_ballSelectionController == null)
         {
-            ballSelectionController = FindObjectOfType<BallSelectionController>();
-            Debug.Log($"GameManager: auto-found BallSelectionController -> {(ballSelectionController != null ? "found" : "NOT FOUND")}");
+            _ballSelectionController = FindObjectOfType<BallSelectionController>();
+            Debug.Log($"GameManager: auto-found BallSelectionController -> {(_ballSelectionController != null ? "found" : "NOT FOUND")}");
         }
-        if (soundManager == null)
+        if (_soundManager == null)
         {
-            soundManager = FindObjectOfType<SoundManager>();
-            Debug.Log($"GameManager: auto-found SoundManager -> {(soundManager != null ? "found" : "NOT FOUND")}");
+            _soundManager = FindObjectOfType<SoundManager>();
+            Debug.Log($"GameManager: auto-found SoundManager -> {(_soundManager != null ? "found" : "NOT FOUND")}");
         }
     }
 
     public void StartGame()
     {
         Debug.Log("GameManager: StartGame called");
-        if (gamesPlayed >= maxPlays)
+        if (_gamesPlayed >= _maxPlays)
         {
             Debug.Log("GameManager: max plays reached");
             return;
         }
 
-        IsRunning = true;
+        _isRunning = true;
 
-        // Reset & enable scoring
-        scoreManager?.ResetScore();
-        scoreManager?.EnableScoring(true);
-        timerManager?.StartTimer();
+        _scoreManager?.ResetScore();
+        _scoreManager?.EnableScoring(true);
+        _timerManager?.StartTimer();
         SubscribeUIToTimer();
 
-        if (uiManager != null)
+        if (_uiManager != null)
         {
-            if (scoreManager != null) uiManager.UpdateScore(scoreManager._score);
-            if (timerManager != null) uiManager.UpdateTime(timerManager._timeRemaining);
-            uiManager.ShowGameUI();
+            if (_scoreManager != null) _uiManager.UpdateScore(_scoreManager._score);
+            if (_timerManager != null) _uiManager.UpdateTime(_timerManager._timeRemaining);
+            _uiManager.ShowGameUI();
         }
 
-        soundManager?.PlayButtonClick();
+        _soundManager?.PlayButtonClick();
 
         OnGameStarted?.Invoke();
 
@@ -140,17 +141,23 @@ public class GameManager : MonoBehaviour
     public void EndGame()
     {
         Debug.Log("GameManager: EndGame called");
-        if (!IsRunning) return;
-        IsRunning = false;
+        if (!_isRunning) return;
+        _isRunning = false;
 
-        timerManager?.StopTimer();
-        scoreManager?.EnableScoring(false);
-        ringMovementController?.StopMovement();
+        _timerManager?.StopTimer();
+        _scoreManager?.EnableScoring(false);
 
-        soundManager?.PlayGameComplete();
-        uiManager?.ShowEndUI(scoreManager != null ? scoreManager._score : 0);
+        if (_ringMovementController != null && _ringMovementController.IsMoving)
+            _ringMovementController.StopMovement();
+
+        _scoreManager?.SetMultiplier(1f);
+        _ringIsMoving = false;
+        _uiManager?.SetMoveButtonLabel(false);
+
+        _soundManager?.PlayGameComplete();
+        _uiManager?.ShowEndUI(_scoreManager != null ? _scoreManager._score : 0);
         OnGameEnded?.Invoke();
-        gamesPlayed++;
+        _gamesPlayed++;
 
         UnsubscribeUIFromTimer();
         FireLifeCycleGameEnded();
@@ -160,56 +167,82 @@ public class GameManager : MonoBehaviour
 #endif
     }
 
+    private void ToggleRingMovement()
+    {
+        if (_ringMovementController == null)
+        {
+            Debug.LogWarning("GameManager: ToggleRingMovement - ringMovementController is null.");
+            return;
+        }
+
+        if (_ringMovementController.IsMoving)
+        {
+            _ringMovementController.StopMovement();
+            _scoreManager?.SetMultiplier(1f);
+            _ringIsMoving = false;
+        }
+        else
+        {
+            _ringMovementController.StartMovement();
+            _scoreManager?.SetMultiplier(2f);
+            _ringIsMoving = true;
+        }
+
+        _uiManager?.SetMoveButtonLabel(_ringIsMoving);
+        _soundManager?.PlayButtonClick();
+        Debug.Log($"GameManager: ToggleRingMovement -> moving={_ringIsMoving}");
+    }
+
     private void SubscribeUIToTimer()
     {
-        if (timerManager == null || uiManager == null)
+        if (_timerManager == null || _uiManager == null)
         {
             Debug.LogWarning("GameManager: SubscribeUIToTimer failed because timerManager or uiManager is null.");
             return;
         }
 
-        timerManager.OnTimeUpdated -= uiManager.UpdateTime;
-        timerManager.OnTimeUpdated += uiManager.UpdateTime;
-        timerManager.OnTimeUp -= EndGame;
-        timerManager.OnTimeUp += EndGame;
+        _timerManager.OnTimeUpdated -= _uiManager.UpdateTime;
+        _timerManager.OnTimeUpdated += _uiManager.UpdateTime;
+        _timerManager.OnTimeUp -= EndGame;
+        _timerManager.OnTimeUp += EndGame;
     }
 
     private void UnsubscribeUIFromTimer()
     {
-        if (timerManager == null || uiManager == null) return;
+        if (_timerManager == null || _uiManager == null) return;
 
-        timerManager.OnTimeUpdated -= uiManager.UpdateTime;
-        timerManager.OnTimeUp -= EndGame;
+        _timerManager.OnTimeUpdated -= _uiManager.UpdateTime;
+        _timerManager.OnTimeUp -= EndGame;
     }
 
-private void SubscribeScoreToUI()
-{
-    if (scoreManager == null || uiManager == null)
+    private void SubscribeScoreToUI()
     {
-        Debug.LogWarning("GameManager: SubscribeScoreToUI failed because scoreManager or uiManager is null.");
-        return;
+        if (_scoreManager == null || _uiManager == null)
+        {
+            Debug.LogWarning("GameManager: SubscribeScoreToUI failed because scoreManager or uiManager is null.");
+            return;
+        }
+
+        _scoreManager.OnScoreChanged -= _uiManager.UpdateScore;
+        _scoreManager.OnScoreChanged += _uiManager.UpdateScore;
+
+        _scoreManager.OnHighscoreChanged -= _uiManager.UpdateHighscore;
+        _scoreManager.OnHighscoreChanged += _uiManager.UpdateHighscore;
+
+        _uiManager.UpdateScore(_scoreManager._score);
+        _uiManager.UpdateHighscore(_scoreManager._highscore);
+
+        Debug.Log("GameManager: Subscribed ScoreManager -> UIManager");
     }
 
-    scoreManager.OnScoreChanged -= uiManager.UpdateScore;
-    scoreManager.OnScoreChanged += uiManager.UpdateScore;
+    private void UnsubscribeScoreFromUI()
+    {
+        if (_scoreManager == null || _uiManager == null) return;
 
-    scoreManager.OnHighscoreChanged -= uiManager.UpdateHighscore;
-    scoreManager.OnHighscoreChanged += uiManager.UpdateHighscore;
-    
-    uiManager.UpdateScore(scoreManager._score);
-    uiManager.UpdateHighscore(scoreManager._highscore);
-
-    Debug.Log("GameManager: Subscribed ScoreManager -> UIManager");
-}
-
-private void UnsubscribeScoreFromUI()
-{
-    if (scoreManager == null || uiManager == null) return;
-
-    scoreManager.OnScoreChanged -= uiManager.UpdateScore;
-    scoreManager.OnHighscoreChanged -= uiManager.UpdateHighscore;
-    Debug.Log("GameManager: Unsubscribed ScoreManager -> UIManager");
-}
+        _scoreManager.OnScoreChanged -= _uiManager.UpdateScore;
+        _scoreManager.OnHighscoreChanged -= _uiManager.UpdateHighscore;
+        Debug.Log("GameManager: Unsubscribed ScoreManager -> UIManager");
+    }
 
     private void FireLifeCycleGameEnded()
     {

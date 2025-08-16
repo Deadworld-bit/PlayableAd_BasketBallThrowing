@@ -37,24 +37,24 @@ public class DunkDetector : MonoBehaviour
     {
         if (_scoreManager == null)
         {
-            if (GameManager.Instance != null && GameManager.Instance.scoreManager != null)
-                _scoreManager = GameManager.Instance.scoreManager;
+            if (GameManager.Instance != null && GameManager.Instance._scoreManager != null)
+                _scoreManager = GameManager.Instance._scoreManager;
             else
                 _scoreManager = FindObjectOfType<ScoreManager>();
         }
 
         if (_uiManager == null)
         {
-            if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
-                _uiManager = GameManager.Instance.uiManager;
+            if (GameManager.Instance != null && GameManager.Instance._uiManager != null)
+                _uiManager = GameManager.Instance._uiManager;
             else
                 _uiManager = FindObjectOfType<UIManager>();
         }
 
         if (_soundManager == null)
         {
-            if (GameManager.Instance != null && GameManager.Instance.soundManager != null)
-                _soundManager = GameManager.Instance.soundManager;
+            if (GameManager.Instance != null && GameManager.Instance._soundManager != null)
+                _soundManager = GameManager.Instance._soundManager;
             else
                 _soundManager = FindObjectOfType<SoundManager>();
         }
@@ -171,9 +171,9 @@ public class DunkDetector : MonoBehaviour
         {
             _scoreManager.AddScore(scoreToAdd, perfect);
         }
-        else if (GameManager.Instance != null && GameManager.Instance.scoreManager != null)
+        else if (GameManager.Instance != null && GameManager.Instance._scoreManager != null)
         {
-            GameManager.Instance.scoreManager.AddScore(scoreToAdd, perfect);
+            GameManager.Instance._scoreManager.AddScore(scoreToAdd, perfect);
         }
         else
         {
@@ -184,8 +184,8 @@ public class DunkDetector : MonoBehaviour
         {
             if (_uiManager != null)
                 _uiManager.ShowPerfectPopup();
-            else if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
-                GameManager.Instance.uiManager.ShowPerfectPopup();
+            else if (GameManager.Instance != null && GameManager.Instance._uiManager != null)
+                GameManager.Instance._uiManager.ShowPerfectPopup();
         }
 
         _alreadyScored.Add(ball);

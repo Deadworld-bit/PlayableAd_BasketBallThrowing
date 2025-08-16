@@ -18,12 +18,17 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button _retryButton;
     [SerializeField] private TMP_Text _endScoreText;
 
+    // Move button (assign in inspector)
+    [SerializeField] private Button _moveButton;
+    [SerializeField] private TMP_Text _moveButtonText;
+
     [Header("Perfect popup")]
     [SerializeField] private GameObject _perfectPopup;
     [SerializeField] private float _perfectPopupDuration = 1f;
 
     public Action _onStartButtonPressed;
     public Action _onRetryButtonPressed;
+    public Action _onMoveButtonPressed;
 
     private void Awake()
     {
@@ -36,6 +41,9 @@ public class UIManager : MonoBehaviour
         if (_retryButton != null) _retryButton.onClick.AddListener(() => { Debug.Log("UIManager: Retry button clicked"); _onRetryButtonPressed?.Invoke(); });
         else Debug.LogWarning("UIManager: _retryButton is not assigned in inspector.");
 
+        if (_moveButton != null) _moveButton.onClick.AddListener(() => { Debug.Log("UIManager: Move button clicked"); _onMoveButtonPressed?.Invoke(); });
+        else Debug.Log("UIManager: _moveButton not assigned (optional).");
+
         if (_perfectPopup != null) _perfectPopup.SetActive(false);
 
         if (_startPanel != null)
@@ -43,7 +51,11 @@ public class UIManager : MonoBehaviour
             _startPanel.SetActive(true);
             Debug.Log("UIManager: Activating start panel on Awake.");
         }
+
         if (_endPanel != null) _endPanel.SetActive(false);
+        if (_moveButton != null)
+            _moveButton.gameObject.SetActive(false);
+        SetMoveButtonLabel(false);
     }
 
     public void ShowStartUI()
@@ -51,6 +63,10 @@ public class UIManager : MonoBehaviour
         Debug.Log("UIManager: ShowStartUI()");
         if (_startPanel != null) _startPanel.SetActive(true);
         if (_endPanel != null) _endPanel.SetActive(false);
+        if (_moveButton != null)
+            _moveButton.gameObject.SetActive(false);
+
+        SetMoveButtonLabel(false);
     }
 
     public void ShowGameUI()
@@ -58,6 +74,8 @@ public class UIManager : MonoBehaviour
         Debug.Log("UIManager: ShowGameUI()");
         if (_startPanel != null) _startPanel.SetActive(false);
         if (_endPanel != null) _endPanel.SetActive(false);
+        if (_moveButton != null)
+            _moveButton.gameObject.SetActive(true);
     }
 
     public void ShowEndUI(int score)
@@ -65,6 +83,8 @@ public class UIManager : MonoBehaviour
         Debug.Log($"UIManager: ShowEndUI(score={score})");
         if (_endPanel != null) _endPanel.SetActive(true);
         if (_endScoreText != null) _endScoreText.text = $"Score: {score}";
+        if (_moveButton != null)
+            _moveButton.gameObject.SetActive(false);
     }
 
     public void UpdateScore(int score)
@@ -98,5 +118,11 @@ public class UIManager : MonoBehaviour
         float t = 0f;
         while (t < _perfectPopupDuration) { t += Time.deltaTime; yield return null; }
         _perfectPopup.SetActive(false);
+    }
+
+    public void SetMoveButtonLabel(bool isMoving)
+    {
+        if (_moveButtonText != null)
+            _moveButtonText.text = isMoving ? "Stop Basket" : "Move Basket";
     }
 }
